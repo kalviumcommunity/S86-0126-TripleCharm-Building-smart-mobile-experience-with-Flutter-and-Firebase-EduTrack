@@ -1,3 +1,27 @@
+# EduTrack
+## Responsive Layout Demo
+
+ This workspace includes a responsive screen example that demonstrates using `MediaQuery` and `LayoutBuilder` to adapt UI between phone and tablet layouts.
+ 
+ - **Screen file**: [lib/screens/responsive_home.dart](lib/screens/responsive_home.dart)
+ 
+ Code snippet (how screen width is detected):
+ 
+ ```dart
+ final screenWidth = MediaQuery.of(context).size.width;
+ final isTablet = screenWidth > 600;
+ ```
+ 
+ The demo uses flexible widgets (`Expanded`, `AspectRatio`, `Wrap`, `GridView`) and `LayoutBuilder` to switch between a single-column phone layout and a two-column tablet layout.
+ 
+ Screenshots
+ 
+ - Add screenshots here (portrait phone, landscape phone, tablet portrait, tablet landscape).
+ 
+ Reflection
+ 
+ - Challenges: Handling spacing and text scaling across devices; deciding breakpoints for tablet vs phone.
+ - Benefit: Responsive design improves usability across multiple device sizes without duplicating UI code.
 # EduTrack – Smart Attendance and Progress Tracker
 
 ## 📱 Project Overview
