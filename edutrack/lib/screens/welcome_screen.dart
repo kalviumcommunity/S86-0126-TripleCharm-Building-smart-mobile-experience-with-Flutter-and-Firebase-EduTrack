@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'responsive_home.dart';
+import 'login_screen.dart';
 
 class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({Key? key}) : super(key: key);
@@ -136,9 +138,17 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                   
                   // Interactive Button
                   ElevatedButton(
-                    onPressed: _toggleMessage,
+                    onPressed: () {
+                      // Navigate to Login Screen
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const LoginScreen(),
+                        ),
+                      );
+                    },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: _buttonColor,
+                      backgroundColor: const Color(0xFF6C63FF),
                       padding: const EdgeInsets.symmetric(
                         horizontal: 40,
                         vertical: 16,
@@ -148,12 +158,38 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                       ),
                       elevation: 4,
                     ),
-                    child: Text(
-                      _showMessage ? 'Got It!' : 'Get Started',
-                      style: const TextStyle(
+                    child: const Text(
+                      'Get Started - Login',
+                      style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  
+                  // View Responsive Demo Button
+                  OutlinedButton.icon(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const ResponsiveHome(),
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.devices),
+                    label: const Text('View Responsive Layout'),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: const Color(0xFF6C63FF),
+                      side: const BorderSide(color: Color(0xFF6C63FF)),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 12,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
                       ),
                     ),
                   ),
