@@ -6,7 +6,104 @@
 
 **Team Name:** Triple Charm  
 **Sprint:** Sprint #2  
-**Version:** 1.0 MVP
+**Version:** 2.0 MVP with Firebase Integration
+
+---
+
+## ✅ Setup Verification
+
+### Flutter Environment Setup (Sprint #2 - Task 0)
+
+This section documents the successful installation and configuration of our Flutter development environment.
+
+#### 🔧 Installation Steps Completed
+
+1. **Flutter SDK Installation**
+   - ✅ Flutter SDK 3.38.7 (Stable Channel) installed
+   - ✅ Dart 3.10.7 configured
+   - ✅ Flutter added to PATH environment variable
+   - ✅ All network resources accessible
+
+2. **Android Studio Configuration**
+   - ✅ Android Studio installed with Flutter & Dart plugins
+   - ✅ Android SDK 36.1.0 configured
+   - ✅ Android Emulator 36.3.10.0 installed
+   - ✅ JDK 21.0.8 (OpenJDK) configured
+
+3. **Emulator Setup**
+   - ✅ Medium Phone API 36.1 (Android 16) emulator created
+   - ✅ Emulator successfully launches and runs Flutter apps
+   - ✅ Device ID: `emulator-5554` (sdk gphone64 x86 64)
+
+4. **Development Platforms Enabled**
+   - ✅ Web development (Chrome & Edge)
+   - ✅ Android development (Emulator + Physical devices)
+   - ✅ Windows desktop development
+
+#### 📊 Flutter Doctor Output
+
+```bash
+[√] Flutter (Channel stable, 3.38.7, on Microsoft Windows [Version 10.0.26100.7462])
+    • Flutter version 3.38.7
+    • Dart version 3.10.7
+    • DevTools version 2.51.1
+
+[√] Windows Version (11 Home Single Language 64-bit)
+
+[!] Android toolchain - develop for Android devices (Android SDK version 36.1.0)
+    • Android SDK at C:\Users\pvson\AppData\Local\Android\sdk
+    • Platform android-36, build-tools 36.1.0
+    • Java version OpenJDK Runtime Environment (build 21.0.8)
+    ! Some Android licenses not accepted (run: flutter doctor --android-licenses)
+
+[√] Chrome - develop for the web
+
+[√] Connected device (4 available)
+    • sdk gphone64 x86 64 (emulator-5554) - Android 16
+    • Windows (desktop)
+    • Chrome (web)
+    • Edge (web)
+
+[√] Network resources
+```
+
+#### 📸 Screenshots
+
+**Flutter Doctor - Healthy Setup**
+![Flutter Doctor Output](demo/flutter_doctor_output.png)
+*Flutter SDK successfully installed and configured with all platforms enabled*
+
+**First App Running on Emulator**
+![EduTrack Running on Android Emulator](demo/emulator_first_run.png)
+*EduTrack welcome screen running on Android emulator (API 36)*
+
+**App Running on Chrome**
+![EduTrack Running on Chrome](demo/chrome_web_run.png)
+*EduTrack Firebase integration working on web platform*
+
+#### 💭 Setup Reflection
+
+**Challenges Faced:**
+1. **Android NDK Corruption**: Initial emulator run failed due to corrupted NDK download. Resolved by deleting `C:\Users\pvson\AppData\Local\Android\sdk\ndk\28.2.13676358` and allowing Android Gradle Plugin to re-download it.
+
+2. **Firebase Configuration**: Needed to add actual Firebase credentials to `main.dart` for authentication to work. Placeholder values caused 400 errors during signup.
+
+3. **Platform Selection**: Had to understand when to use web (`-d chrome`) vs Android emulator (`-d emulator-5554`) for different testing scenarios.
+
+**How This Setup Prepares Us:**
+- **Multi-platform Development**: Can test on web, Android emulator, and Windows desktop simultaneously
+- **Firebase Integration**: Environment ready for cloud services with proper authentication and database setup
+- **Real-time Testing**: Hot reload enables instant feedback during UI/UX development
+- **Production-ready**: Configuration mirrors production environment with Firebase backend
+- **Team Collaboration**: Standardized setup ensures all team members can run and test the app consistently
+
+**Setup Success Metrics:**
+- ✅ App runs successfully on Android emulator (API 36)
+- ✅ App runs successfully on Chrome web browser
+- ✅ Firebase Authentication working (signup/login tested)
+- ✅ Cloud Firestore CRUD operations functional
+- ✅ Hot reload working for rapid development
+- ✅ Build times acceptable (< 2 minutes for initial Android build)
 
 ---
 
