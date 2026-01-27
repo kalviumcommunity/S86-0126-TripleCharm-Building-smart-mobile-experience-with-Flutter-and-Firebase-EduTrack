@@ -4,6 +4,9 @@ import '../services/auth_service.dart';
 import '../services/firestore_service.dart';
 import 'login_screen.dart';
 
+// Debug logging constant
+const String _debugTag = '[DashboardScreen]';
+
 class DashboardScreen extends StatefulWidget {
   final User user;
   
@@ -26,6 +29,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   void initState() {
     super.initState();
+    debugPrint('$_debugTag initState() called - Initializing Dashboard');
+    debugPrint('$_debugTag User ID: ${widget.user.uid}');
     _loadUserData();
     _loadStudents();
   }
@@ -39,12 +44,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   Future<void> _loadUserData() async {
     try {
+      debugPrint('$_debugTag Loading user data for UID: ${widget.user.uid}');
       final data = await _firestoreService.getUserData(widget.user.uid);
+      debugPrint('$_debugTag User data loaded successfully: ${data?['name']}');
       setState(() {
         _userData = data;
         _isLoading = false;
       });
     } catch (e) {
+      debugPrint('$_debugTag ERROR loading user data: $e');
       setState(() {
         _isLoading = false;
       });
@@ -54,11 +62,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   Future<void> _loadStudents() async {
     try {
+      debugPrint('$_debugTag Loading students list...');
       final students = await _firestoreService.getStudents();
+      debugPrint('$_debugTag Loaded ${students.length} students successfully');
       setState(() {
         _students = students;
       });
     } catch (e) {
+      debugPrint('$_debugTag ERROR loading students: $e');
       _showSnackBar('Failed to load students: $e', isError: true);
     }
   }
@@ -74,7 +85,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   Future<void> _handleLogout() async {
     try {
+      debugPrint('$_debugTag User logout initiated - ${widget.user.email}');
       await _authService.logout();
+      debugPrint('$_debugTag Logout successful, redirecting to login screen');
       if (mounted) {
         Navigator.pushReplacement(
           context,
@@ -82,11 +95,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
         );
       }
     } catch (e) {
+      debugPrint('$_debugTag ERROR during logout: $e');
       _showSnackBar('Logout failed: $e', isError: true);
     }
   }
 
   Future<void> _showAddStudentDialog() async {
+    debugPrint('$_debugTag Add Student dialog opened');
     _studentNameController.clear();
     _studentClassController.clear();
 
@@ -124,15 +139,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
               if (_studentNameController.text.isNotEmpty &&
                   _studentClassController.text.isNotEmpty) {
                 try {
+                  debugPrint('$_debugTag Adding new student: ${_studentNameController.text}');
                   await _firestoreService.addStudent({
                     'name': _studentNameController.text.trim(),
                     'class': _studentClassController.text.trim(),
                     'teacherId': widget.user.uid,
                   });
+                  debugPrint('$_debugTag Student added successfully');
                   Navigator.pop(context);
                   _loadStudents();
                   _showSnackBar('Student added successfully!');
                 } catch (e) {
+                  debugPrint('$_debugTag ERROR adding student: $e');
                   _showSnackBar('Failed to add student: $e', isError: true);
                 }
               }
@@ -146,19 +164,23 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   Future<void> _deleteStudent(String studentId) async {
     try {
+      debugPrint('$_debugTag Deleting student with ID: $studentId');
       await _firestoreService.deleteStudent(studentId);
+      debugPrint('$_debugTag Student deleted successfully');
       _loadStudents();
       _showSnackBar('Student deleted successfully!');
     } catch (e) {
+      debugPrint('$_debugTag ERROR deleting student: $e');
       _showSnackBar('Failed to delete student: $e', isError: true);
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    debugPrint('$_debugTag Building Dashboard UI');
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Dashboard'),
+        title: const Text('EduTrack Dashboard'),
         backgroundColor: const Color(0xFF6C63FF),
         foregroundColor: Colors.white,
         actions: [
