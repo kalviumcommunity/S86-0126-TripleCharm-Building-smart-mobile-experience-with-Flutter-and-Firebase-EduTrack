@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'screens/welcome_screen.dart';
 import 'screens/login_screen.dart';
+import 'screens/stateless_stateful_demo.dart';
 
 void main() async {
   // Ensure Flutter bindings are initialized
@@ -46,6 +47,7 @@ class MyApp extends StatelessWidget {
       routes: {
         '/login': (context) => const LoginScreen(),
         '/welcome': (context) => const WelcomeScreen(),
+        '/demo': (context) => const StatelessStatefulDemoScreen(),
       },
     );
   }

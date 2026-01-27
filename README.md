@@ -798,6 +798,8 @@ This structure supports **scalable, modular development**:
 2. ✅ ~~Student Management (Add/View students)~~ **COMPLETED**
 3. Daily Attendance Tracking UI
 4. Academic Progress Entry and Visualization
+ 
+ See the [Stateless vs Stateful demo](DEMO_STATELESS_STATEFUL.md) for a small example that demonstrates `StatelessWidget` vs `StatefulWidget` usage.
 5. Attendance reports and analytics
 6. Student profile details screen
 7. Offline data synchronization
