@@ -143,6 +143,21 @@ class HomeScreen extends StatelessWidget {
                   ),
                 ),
               ),
+              const SizedBox(height: 16),
+              OutlinedButton.icon(
+                onPressed: () {
+                  Navigator.pushNamed(context, '/state-management');
+                },
+                icon: const Icon(Icons.show_chart),
+                label: const Text('State Management Demo'),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: Colors.teal,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 32,
+                    vertical: 16,
+                  ),
+                ),
+              ),
             ],
           ),
         ),
