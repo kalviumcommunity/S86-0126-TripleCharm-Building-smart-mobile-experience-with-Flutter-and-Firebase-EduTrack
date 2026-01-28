@@ -128,6 +128,21 @@ class HomeScreen extends StatelessWidget {
                   ),
                 ),
               ),
+              const SizedBox(height: 16),
+              OutlinedButton.icon(
+                onPressed: () {
+                  Navigator.pushNamed(context, '/user-input');
+                },
+                icon: const Icon(Icons.edit_document),
+                label: const Text('User Input Form'),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: Colors.purple,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 32,
+                    vertical: 16,
+                  ),
+                ),
+              ),
             ],
           ),
         ),
