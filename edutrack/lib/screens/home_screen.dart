@@ -33,8 +33,18 @@ class HomeScreen extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               const Text(
-                'This is the Home Screen. Use the buttons below to navigate to different screens.',
-                style: TextStyle(fontSize: 16),
+                'EduTrack Multi-Screen Navigation System',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.grey,
+                  fontWeight: FontWeight.w500,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Use the buttons below to explore different navigation methods.',
+                style: TextStyle(fontSize: 14),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 32),

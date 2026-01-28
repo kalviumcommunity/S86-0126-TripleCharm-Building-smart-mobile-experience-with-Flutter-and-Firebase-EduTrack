@@ -45,6 +45,22 @@ class ProfileScreen extends StatelessWidget {
                   color: Colors.grey,
                 ),
               ),
+              const SizedBox(height: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                decoration: BoxDecoration(
+                  color: Colors.deepPurple.shade50,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: const Text(
+                  'Sprint #2 - Navigation Demo',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.deepPurple,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
               const SizedBox(height: 32),
               Card(
                 elevation: 4,

@@ -32,7 +32,17 @@ class SecondScreen extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               const Text(
-                'You successfully navigated to the second screen using Navigator.pushNamed()!',
+                'Navigation Successful! 🎉',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF00D4FF),
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'You successfully navigated using Navigator.pushNamed()',
                 style: TextStyle(fontSize: 16),
                 textAlign: TextAlign.center,
               ),
