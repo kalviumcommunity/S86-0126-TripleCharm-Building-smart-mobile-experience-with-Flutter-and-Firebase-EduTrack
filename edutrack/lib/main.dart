@@ -3,6 +3,9 @@ import 'package:firebase_core/firebase_core.dart';
 import 'screens/welcome_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/stateless_stateful_demo.dart';
+import 'screens/home_screen.dart';
+import 'screens/second_screen.dart';
+import 'screens/profile_screen.dart';
 
 void main() async {
   // Ensure Flutter bindings are initialized
@@ -41,10 +44,13 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF6C63FF)),
         useMaterial3: true,
       ),
-      // Start with WelcomeScreen, which has navigation to Login
-      home: const WelcomeScreen(),
-      // Define routes for easy navigation
+      // Define initial route - start with navigation demo
+      initialRoute: '/home',
+      // Define all named routes for easy navigation
       routes: {
+        '/home': (context) => const HomeScreen(),
+        '/second': (context) => const SecondScreen(),
+        '/profile': (context) => const ProfileScreen(),
         '/login': (context) => const LoginScreen(),
         '/welcome': (context) => const WelcomeScreen(),
         '/demo': (context) => const StatelessStatefulDemoScreen(),
