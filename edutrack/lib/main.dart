@@ -6,6 +6,7 @@ import 'screens/stateless_stateful_demo.dart';
 import 'screens/home_screen.dart';
 import 'screens/second_screen.dart';
 import 'screens/profile_screen.dart';
+import 'screens/responsive_layout.dart';
 
 void main() async {
   // Ensure Flutter bindings are initialized
@@ -50,6 +51,7 @@ class MyApp extends StatelessWidget {
       routes: {
         '/home': (context) => const HomeScreen(),
         '/second': (context) => const SecondScreen(),
+        '/responsive': (context) => const ResponsiveLayout(),
         '/profile': (context) => const ProfileScreen(),
         '/login': (context) => const LoginScreen(),
         '/welcome': (context) => const WelcomeScreen(),

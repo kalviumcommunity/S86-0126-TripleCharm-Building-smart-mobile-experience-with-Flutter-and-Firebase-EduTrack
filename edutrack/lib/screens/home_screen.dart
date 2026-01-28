@@ -86,6 +86,21 @@ class HomeScreen extends StatelessWidget {
               const SizedBox(height: 16),
               OutlinedButton.icon(
                 onPressed: () {
+                  Navigator.pushNamed(context, '/responsive');
+                },
+                icon: const Icon(Icons.responsive_layout),
+                label: const Text('View Responsive Layout'),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: Colors.deepOrange,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 32,
+                    vertical: 16,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              OutlinedButton.icon(
+                onPressed: () {
                   Navigator.pushNamed(context, '/demo');
                 },
                 icon: const Icon(Icons.widgets),

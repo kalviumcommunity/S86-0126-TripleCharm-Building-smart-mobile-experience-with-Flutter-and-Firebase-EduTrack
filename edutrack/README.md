@@ -10,6 +10,7 @@
 | 🌲 Understanding the Widget Tree and Flutter's Reactive UI Model | ✅ **COMPLETED** | [Jump to section](#-task-2-understanding-the-widget-tree-and-flutters-reactive-ui-model---completed) |
 | 🔧 Using Hot Reload, Debug Console, and Flutter DevTools Effectively | ✅ **COMPLETED** | [Jump to section](#-task-3-using-hot-reload-debug-console-and-flutter-devtools---completed) |
 | 🧭 Structuring Multi-Screen Navigation Using Navigator and Routes | ✅ **COMPLETED** | [Jump to section](#-task-4-structuring-multi-screen-navigation-using-navigator-and-routes---completed) |
+| 📐 Designing Responsive Layouts Using Rows, Columns, and Containers | ✅ **COMPLETED** | [Jump to section](#-task-5-designing-responsive-layouts-using-rows-columns-and-containers---completed) |
 
 ---
 
@@ -1221,5 +1222,55 @@ final isTablet = screenWidth > 600;
 - Single codebase for all devices
 - Improved usability
 - Better user experience
+
+---
+
+###  Task 5: Designing Responsive Layouts Using Rows, Columns, and Containers - COMPLETED
+
+#### Overview  
+Demonstrates building responsive layouts using Container, Row, and Column widgets that adapt between phone and tablet sizes.
+
+**Implementation:** [lib/screens/responsive_layout.dart](lib/screens/responsive_layout.dart)
+
+#### Core Layout Widgets
+
+**Container** - Flexible box with styling (padding, margin, decoration)
+**Row** - Horizontal arrangement with mainAxisAlignment & crossAxisAlignment  
+**Column** - Vertical stacking of widgets
+
+#### Implementation Highlights
+
+- Header with gradient Container
+- Info card using Row with device dimensions
+- Adaptive grid: Row for tablets, Column for phones
+- Feature cards in horizontal Row
+- Uses Expanded widgets for proportional spacing
+
+#### Responsive Strategy
+
+```dart
+final screenWidth = MediaQuery.of(context).size.width;
+final isTablet = screenWidth > 600;
+
+isTablet ? Row(children: [...]) : Column(children: [...]);
+```
+
+**Phone (< 600px):** Single column, compact spacing  
+**Tablet (> 600px):** Two-column Row layout, expanded panels
+
+#### Testing
+```bash
+flutter run -d windows
+flutter run -d chrome
+# Resize window to test responsiveness
+```
+
+#### Reflection
+
+**Why responsiveness matters:** Users access apps on 24,000+ device types. Responsive design ensures optimal UX across all screen sizes, preventing layout breaks and improving satisfaction.
+
+**Challenges:** Breakpoint selection, content scaling, spacing consistency, preventing overflow.
+
+**Orientation improvements:** Use OrientationBuilder, adjust grid columns (2 portrait, 4 landscape), reposition navigation.
 
 ---
