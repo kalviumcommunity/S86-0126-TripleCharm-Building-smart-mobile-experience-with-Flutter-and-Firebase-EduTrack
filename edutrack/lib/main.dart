@@ -8,6 +8,7 @@ import 'screens/second_screen.dart';
 import 'screens/profile_screen.dart';
 import 'screens/responsive_layout.dart';
 import 'screens/scrollable_views.dart';
+import 'screens/user_input_form.dart';
 
 void main() async {
   // Ensure Flutter bindings are initialized
@@ -58,6 +59,7 @@ class MyApp extends StatelessWidget {
         '/login': (context) => const LoginScreen(),
         '/welcome': (context) => const WelcomeScreen(),
         '/demo': (context) => const StatelessStatefulDemoScreen(),
+        '/user-input': (context) => const UserInputForm(),
       },
     );
   }
