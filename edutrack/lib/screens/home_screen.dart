@@ -88,10 +88,25 @@ class HomeScreen extends StatelessWidget {
                 onPressed: () {
                   Navigator.pushNamed(context, '/responsive');
                 },
-                icon: const Icon(Icons.responsive_layout),
+                icon: Icon(Icons.phone_android),
                 label: const Text('View Responsive Layout'),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: Colors.deepOrange,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 32,
+                    vertical: 16,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              OutlinedButton.icon(
+                onPressed: () {
+                  Navigator.pushNamed(context, '/scrollable');
+                },
+                icon: const Icon(Icons.view_list),
+                label: const Text('View Scrollable Lists'),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: Colors.green,
                   padding: const EdgeInsets.symmetric(
                     horizontal: 32,
                     vertical: 16,

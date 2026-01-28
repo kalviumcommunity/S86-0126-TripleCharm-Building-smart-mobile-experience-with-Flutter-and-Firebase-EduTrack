@@ -11,6 +11,7 @@
 | 🔧 Using Hot Reload, Debug Console, and Flutter DevTools Effectively | ✅ **COMPLETED** | [Jump to section](#-task-3-using-hot-reload-debug-console-and-flutter-devtools---completed) |
 | 🧭 Structuring Multi-Screen Navigation Using Navigator and Routes | ✅ **COMPLETED** | [Jump to section](#-task-4-structuring-multi-screen-navigation-using-navigator-and-routes---completed) |
 | 📐 Designing Responsive Layouts Using Rows, Columns, and Containers | ✅ **COMPLETED** | [Jump to section](#-task-5-designing-responsive-layouts-using-rows-columns-and-containers---completed) |
+| 📜 Building Scrollable Layouts with ListView and GridView | ✅ **COMPLETED** | [Jump to section](#-task-6-building-scrollable-layouts-with-listview-and-gridview---completed) |
 
 ---
 
@@ -1272,5 +1273,215 @@ flutter run -d chrome
 **Challenges:** Breakpoint selection, content scaling, spacing consistency, preventing overflow.
 
 **Orientation improvements:** Use OrientationBuilder, adjust grid columns (2 portrait, 4 landscape), reposition navigation.
+
+---
+
+## 📜 Task 6: Building Scrollable Layouts with ListView and GridView - **COMPLETED**
+
+**Objective:** Create scrollable user interfaces using Flutter's `ListView` and `GridView` widgets for displaying large datasets efficiently.
+
+### 📂 Implementation File
+- **File:** `lib/screens/scrollable_views.dart`
+- **Route:** `/scrollable`
+- **Navigation:** Access via "View Scrollable Layouts" button on home screen
+
+### 🎯 Key Features Implemented
+
+#### 1. Horizontal ListView
+Displays subject cards with horizontal scrolling:
+```dart
+ListView(
+  scrollDirection: Axis.horizontal,
+  children: [
+    _buildSubjectCard('Mathematics', Icons.calculate, Colors.blue),
+    _buildSubjectCard('Physics', Icons.science, Colors.purple),
+    _buildSubjectCard('Chemistry', Icons.biotech, Colors.green),
+    // ... more subjects
+  ],
+)
+```
+
+**Use case:** Subject selector, category browser, image gallery
+
+#### 2. Vertical ListView.builder
+Efficiently renders student list with dynamic data:
+```dart
+ListView.builder(
+  itemCount: students.length,
+  itemBuilder: (context, index) {
+    return ListTile(
+      leading: CircleAvatar(
+        backgroundColor: Colors.teal[700],
+        child: Text(students[index].name[0]),
+      ),
+      title: Text(students[index].name),
+      subtitle: Text('${students[index].class} - ${students[index].status}'),
+      trailing: Icon(
+        students[index].status == 'Present' 
+          ? Icons.check_circle 
+          : Icons.cancel,
+      ),
+    );
+  },
+)
+```
+
+**Use case:** Contact lists, chat messages, feed items
+
+#### 3. GridView.builder
+Two-column grid for feature modules:
+```dart
+GridView.builder(
+  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+    crossAxisCount: 2,
+    crossAxisSpacing: 16,
+    mainAxisSpacing: 16,
+    childAspectRatio: 1.2,
+  ),
+  itemCount: features.length,
+  itemBuilder: (context, index) {
+    return Card(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(features[index].icon, size: 48),
+          SizedBox(height: 12),
+          Text(features[index].title),
+        ],
+      ),
+    );
+  },
+)
+```
+
+**Use case:** Product catalog, photo albums, dashboard tiles
+
+### 🔧 Technical Implementation
+
+#### Route Configuration (main.dart)
+```dart
+routes: {
+  '/scrollable': (context) => const ScrollableViews(),
+  // ... other routes
+}
+```
+
+#### Data Models
+```dart
+class Student {
+  final String name;
+  final String class;
+  final String status;
+  Student(this.name, this.class, this.status);
+}
+
+class Feature {
+  final String title;
+  final IconData icon;
+  final Color color;
+  Feature(this.title, this.icon, this.color);
+}
+```
+
+### 📊 Implementation Breakdown
+
+| Widget Type | Count | Scroll Direction | Builder | Use Case |
+|-------------|-------|------------------|---------|----------|
+| ListView (Horizontal) | 5 items | Horizontal | Static | Subject cards |
+| ListView.builder | 10 items | Vertical | Dynamic | Student roster |
+| GridView.builder | 8 items | Vertical | Dynamic | Feature modules |
+
+### 🧪 Testing
+```bash
+# Run the app
+flutter run -d windows
+
+# Navigate to Scrollable Views
+# 1. Launch app → Home Screen
+# 2. Tap "View Scrollable Layouts"
+# 3. Test horizontal scroll (subject cards)
+# 4. Test vertical scroll (student list)
+# 5. Test grid scroll (feature modules)
+
+# Analyze code
+flutter analyze
+```
+
+### 💡 Reflection Questions & Answers
+
+#### **Why are builder methods more efficient than static lists?**
+Builder methods (`ListView.builder`, `GridView.builder`) only build visible items on-screen, using lazy loading. Static lists (`ListView(children: [...])`) build ALL items immediately, consuming excessive memory. For 1000 items, builder uses ~50 items worth of memory, static uses all 1000.
+
+**Performance comparison:**
+- **Static ListView:** O(n) memory, loads all items upfront
+- **Builder ListView:** O(1) memory for visible items, builds on-demand
+
+#### **When would you use ListView vs. GridView in real-world apps?**
+
+**ListView (single column):**
+- Chat messages (WhatsApp, Telegram)
+- Email inbox (Gmail)
+- Social feed (Twitter, Instagram feed)
+- Settings menus
+- Contact lists
+
+**GridView (multi-column):**
+- Photo galleries (Google Photos, Instagram grid)
+- Product catalogs (Amazon, e-commerce)
+- App launchers (home screen icons)
+- Video thumbnails (YouTube, Netflix)
+- Dashboard widgets
+
+**Decision factors:**
+- **ListView:** Content needs full width, reading flow is vertical
+- **GridView:** Visual items need comparison, space optimization
+
+#### **What's the difference between ListView and SingleChildScrollView?**
+
+**ListView:**
+- Optimized for lists of **multiple** children
+- Built-in lazy loading via `.builder()`
+- Efficient memory management for large lists
+- Automatically handles item recycling
+
+**SingleChildScrollView:**
+- Wraps a **single** child widget
+- No lazy loading – entire content stays in memory
+- Used when content is pre-determined and small
+- Common with Column/Row that needs scrolling
+
+**Example:**
+```dart
+// Use ListView for dynamic lists
+ListView.builder(
+  itemCount: 1000,
+  itemBuilder: (context, index) => Text('Item $index'),
+)
+
+// Use SingleChildScrollView for fixed forms
+SingleChildScrollView(
+  child: Column(
+    children: [
+      TextField(),
+      TextField(),
+      ElevatedButton(),
+    ],
+  ),
+)
+```
+
+**Rule of thumb:** 
+- Multiple similar items → **ListView.builder**
+- Single complex layout → **SingleChildScrollView**
+
+### 🚀 Key Learnings
+1. **Builder pattern** is essential for lists > 20 items
+2. **Horizontal scrolling** requires `scrollDirection: Axis.horizontal`
+3. **GridView** needs `gridDelegate` to define column count and spacing
+4. **ListTile** provides standardized layout for list items
+5. **CircleAvatar** is perfect for user initials/icons
+
+### 📁 Complete Code Location
+**File:** [lib/screens/scrollable_views.dart](lib/screens/scrollable_views.dart)
 
 ---

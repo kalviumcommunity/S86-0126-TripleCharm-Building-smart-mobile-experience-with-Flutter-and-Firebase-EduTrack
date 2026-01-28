@@ -7,6 +7,7 @@ import 'screens/home_screen.dart';
 import 'screens/second_screen.dart';
 import 'screens/profile_screen.dart';
 import 'screens/responsive_layout.dart';
+import 'screens/scrollable_views.dart';
 
 void main() async {
   // Ensure Flutter bindings are initialized
@@ -52,6 +53,7 @@ class MyApp extends StatelessWidget {
         '/home': (context) => const HomeScreen(),
         '/second': (context) => const SecondScreen(),
         '/responsive': (context) => const ResponsiveLayout(),
+        '/scrollable': (context) => const ScrollableViews(),
         '/profile': (context) => const ProfileScreen(),
         '/login': (context) => const LoginScreen(),
         '/welcome': (context) => const WelcomeScreen(),
