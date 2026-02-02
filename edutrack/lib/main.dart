@@ -8,6 +8,7 @@ import 'screens/second_screen.dart';
 import 'screens/profile_screen.dart';
 import 'screens/responsive_layout.dart';
 import 'screens/responsive_demo.dart';
+import 'screens/asset_demo.dart';
 import 'screens/scrollable_views.dart';
 import 'screens/user_input_form.dart';
 import 'screens/state_management_demo.dart';
@@ -57,6 +58,7 @@ class MyApp extends StatelessWidget {
         '/second': (context) => const SecondScreen(),
         '/responsive': (context) => const ResponsiveLayout(),
         '/responsive-demo': (context) => const ResponsiveDemo(),
+        '/assets-demo': (context) => const AssetDemo(),
         '/scrollable': (context) => const ScrollableViews(),
         '/profile': (context) => const ProfileScreen(),
         '/login': (context) => const LoginScreen(),
