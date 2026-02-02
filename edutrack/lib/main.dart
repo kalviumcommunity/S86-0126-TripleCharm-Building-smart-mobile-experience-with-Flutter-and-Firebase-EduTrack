@@ -3,6 +3,10 @@ import 'package:firebase_core/firebase_core.dart';
 import 'screens/welcome_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/stateless_stateful_demo.dart';
+import 'screens/animated_container_demo.dart';
+import 'screens/animated_opacity_demo.dart';
+import 'screens/rotate_logo_demo.dart';
+import 'screens/page_transition_demo.dart';
 import 'screens/home_screen.dart';
 import 'screens/second_screen.dart';
 import 'screens/profile_screen.dart';
@@ -66,6 +70,11 @@ class MyApp extends StatelessWidget {
         '/demo': (context) => const StatelessStatefulDemoScreen(),
         '/user-input': (context) => const UserInputForm(),
         '/state-management': (context) => const StateManagementDemo(),
+        // Animation demos
+        '/animations/container': (context) => const AnimatedContainerDemo(),
+        '/animations/opacity': (context) => const AnimatedOpacityDemo(),
+        '/animations/rotate': (context) => const RotateLogoDemo(),
+        '/animations/page': (context) => const PageTransitionDemo(),
       },
     );
   }
