@@ -160,7 +160,129 @@ This structure supports **scalable, modular development**:
 
 ---
 
-## 📲 Current MVP Features
+## � FlutterFire CLI — Firebase Integration
+
+**What is FlutterFire CLI?**
+
+The FlutterFire CLI is a command-line tool that simplifies connecting your Flutter project to Firebase. It automatically generates configuration files for all supported platforms (Android, iOS, macOS, and Web) and sets up the correct initialization steps.
+
+**Advantages:**
+- Avoids manual editing errors in `google-services.json` or Gradle files ✅
+- Supports multi-platform integration in one command ✅
+- Keeps Firebase SDK versions consistent across environments ✅
+
+### 1) Install FlutterFire CLI
+
+**Prerequisites:**
+- Flutter SDK & Dart installed
+- Node.js and npm installed (required for Firebase tools)
+
+```bash
+# Install Firebase CLI (if not already)
+npm install -g firebase-tools
+
+# Install FlutterFire CLI
+dart pub global activate flutterfire_cli
+
+# Verify installation
+flutterfire --version
+```
+
+### 2) Login and Configure Firebase
+
+```bash
+# Login to Firebase (opens browser for Google sign-in)
+firebase login
+
+# From your Flutter project directory, run:
+flutterfire configure
+```
+The CLI will detect your Firebase projects, ask you to select one, and generate a configuration file at `lib/firebase_options.dart` containing platform-specific credentials.
+
+### 3) Add Firebase Core Dependency
+
+Open `pubspec.yaml` and add:
+
+```yaml
+dependencies:
+  firebase_core: ^3.0.0
+```
+
+Then install:
+
+```bash
+flutter pub get
+```
+
+### 4) Initialize Firebase Using Generated Config File
+
+Update `lib/main.dart` to use the generated `firebase_options.dart`:
+
+```dart
+import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  runApp(MyApp());
+}
+```
+
+### 5) Verify Successful Integration
+
+Run the app:
+
+```bash
+flutter run
+```
+
+You should see the message in the app UI and logs such as `Firebase initialized with DefaultFirebaseOptions` in the console. Also check Firebase Console → Project Settings → Your Apps — your Flutter app should appear as an active registered instance.
+
+### 6) Adding Other Firebase SDKs
+
+Add packages to `pubspec.yaml` as needed:
+
+```yaml
+dependencies:
+  cloud_firestore: ^5.0.0
+  firebase_auth: ^5.0.0
+  firebase_analytics: ^11.0.0
+```
+
+Then run:
+
+```bash
+flutter pub get
+```
+
+New Firebase SDKs will use the configuration in `lib/firebase_options.dart`.
+
+### 7) Common Issues & Fixes
+
+| Issue | Cause | Fix |
+|------|-------|-----|
+| `flutterfire` not recognized | CLI not in PATH | Add `~/.pub-cache/bin` to your PATH (or restart terminal after activation) |
+| Firebase not initialized | Missing `await Firebase.initializeApp()` | Ensure initialization is awaited before `runApp()` |
+| Build fails on Android | Missing Google Services plugin | Add `com.google.gms.google-services` plugin in Gradle files (see Firebase docs) |
+| Project mismatch | Wrong Firebase project selected | Re-run `flutterfire configure` and select the correct project |
+
+---
+
+> **README Guidelines for this repo:**
+>
+> - Add the **Project Title** and purpose of the Firebase CLI integration
+> - Document steps performed: installation, login, configuration, initialization
+> - Include the `main.dart` snippet shown above
+> - Add a screenshot of terminal logs or Firebase Console showing successful SDK setup
+> - Reflect on the setup: How the FlutterFire CLI simplified integration; errors faced and how you resolved them; why CLI-based setup is preferred over manual configuration
+
+---
+
+## �📲 Current MVP Features
 
 ### ✅ Implemented (Sprint #2)
 
@@ -2237,7 +2359,7 @@ After this task, you understand:
 
 ###  Overview
 
-In this task, you'll learn how to manage state in Flutter using the **setState()** method � the most fundamental technique for handling dynamic user interfaces. State management is what makes your app interactive: when a user taps a button, updates a value, or toggles an option, the UI changes instantly to reflect that new state.
+In this task, you'll learn how to manage state in Flutter using the **setState()** method � the most fundamental technique for handling dynamic user interfaces. State management is what makes your app interactive: when a user taps a button, updates a value, or toggles an option, the UI changes instantly to reflect that new state.
 
 **File Created:** [lib/screens/state_management_demo.dart](lib/screens/state_management_demo.dart)
 
@@ -2648,11 +2770,11 @@ setState(() {
 
 **Q1: What is the key difference between Stateless and Stateful widgets?**
 
-*Answer:* Stateless widgets are immutable and don't change once built � think of them as frozen snapshots. Stateful widgets can change dynamically based on user interactions or data updates. Stateful widgets have an associated State class that holds mutable data and can trigger rebuilds using setState().
+*Answer:* Stateless widgets are immutable and don't change once built � think of them as frozen snapshots. Stateful widgets can change dynamically based on user interactions or data updates. Stateful widgets have an associated State class that holds mutable data and can trigger rebuilds using setState().
 
 **Q2: Why is setState() important for Flutter's reactive model?**
 
-*Answer:* setState() is the bridge between data changes and UI updates in Flutter. It tells the framework that a variable changed and the widget needs rebuilding. Without setState(), the UI wouldn't reflect state changes � the app would be unresponsive. setState() enables the reactive, declarative programming model that makes Flutter powerful.
+*Answer:* setState() is the bridge between data changes and UI updates in Flutter. It tells the framework that a variable changed and the widget needs rebuilding. Without setState(), the UI wouldn't reflect state changes � the app would be unresponsive. setState() enables the reactive, declarative programming model that makes Flutter powerful.
 
 **Q3: How can improper use of setState() affect performance?**
 
