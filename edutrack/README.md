@@ -239,6 +239,57 @@ This structure supports **scalable, modular development**:
 
 ---
 
+## ✨ Animations Demo
+
+This project now includes a small set of animation demos demonstrating implicit and explicit animations and page transitions. Navigate to these screens from the app routes:
+
+- `'/animations/container'` — `AnimatedContainer` size/color/shape transition.
+- `'/animations/opacity'` — `AnimatedOpacity` fade-in / fade-out using `FlutterLogo`.
+- `'/animations/rotate'` — explicit animation with `AnimationController` + `RotationTransition`.
+- `'/animations/page'` — custom slide page transition via `PageRouteBuilder`.
+
+Example snippet (`AnimatedContainer`):
+
+```dart
+AnimatedContainer(
+  width: _toggled ? 220 : 120,
+  height: _toggled ? 120 : 220,
+  color: _toggled ? Colors.teal : Colors.orange,
+  duration: Duration(milliseconds: 600),
+  curve: Curves.easeInOut,
+);
+```
+
+Example snippet (`PageRouteBuilder` slide transition):
+
+```dart
+Navigator.of(context).push(PageRouteBuilder(
+  pageBuilder: (context, animation, secondary) => NextPage(),
+  transitionsBuilder: (context, animation, secondary, child) {
+    return SlideTransition(
+      position: Tween<Offset>(begin: Offset(1,0), end: Offset.zero)
+          .animate(CurvedAnimation(parent: animation, curve: Curves.easeInOut)),
+      child: child,
+    );
+  },
+));
+```
+
+How to try:
+
+```bash
+flutter pub get
+flutter run
+# then open the app and navigate to the animation routes
+```
+
+Reflection:
+
+- **Why animations matter:** They guide attention, provide feedback, and make navigation feel natural.
+- **Implicit vs explicit:** Implicit animations (e.g., `AnimatedContainer`) animate on property change automatically. Explicit animations (e.g., `AnimationController`) give precise control over timing and curves.
+- **Applying in the main app:** Use short, meaningful animations (<800ms), prefer built-in implicit widgets for simple transitions, and reserve explicit controllers for complex interactions.
+
+
 ## 🎨 UI Components & Styling
 
 ### Theme Colors
