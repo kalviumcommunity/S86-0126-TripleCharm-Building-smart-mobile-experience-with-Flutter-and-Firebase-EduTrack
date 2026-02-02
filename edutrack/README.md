@@ -408,6 +408,23 @@ flutter build apk --release
 
 Commit: `feat: created and reused custom widgets for modular UI design`
 
+---
+
+## **Responsive Design Demo**
+
+- **What:** Implemented a dedicated responsive demo screen at [lib/screens/responsive_demo.dart](lib/screens/responsive_demo.dart#L1-L200) that demonstrates using `MediaQuery` for proportional sizing and `LayoutBuilder` for conditional layout switching (mobile vs tablet).
+- **How to test:**
+
+```bash
+flutter pub get
+flutter run
+```
+
+Open the app and navigate to the Responsive Demo screen (route `/responsive` if configured). Resize the emulator or run on a tablet emulator to observe the layout switching at ~600px width.
+
+- **Commit:** `feat: implemented responsive design using MediaQuery and LayoutBuilder`
+
+
 
 ### ✅ Task 1: Creating and Using Stateless and Stateful Widgets - COMPLETED
 
