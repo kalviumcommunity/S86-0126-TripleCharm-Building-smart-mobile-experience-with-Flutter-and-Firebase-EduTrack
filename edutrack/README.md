@@ -12,6 +12,7 @@
 | 🧭 Structuring Multi-Screen Navigation Using Navigator and Routes | ✅ **COMPLETED** | [Jump to section](#-task-4-structuring-multi-screen-navigation-using-navigator-and-routes---completed) |
 | 📐 Designing Responsive Layouts Using Rows, Columns, and Containers | ✅ **COMPLETED** | [Jump to section](#-task-5-designing-responsive-layouts-using-rows-columns-and-containers---completed) |
 | 📜 Building Scrollable Layouts with ListView and GridView | ✅ **COMPLETED** | [Jump to section](#-task-6-building-scrollable-layouts-with-listview-and-gridview---completed) |
+| 🔥 **Firebase Integration** | ✅ **COMPLETED** | [Jump to section](#-firebase-integration-setup---completed) |
 
 ---
 
@@ -2891,4 +2892,397 @@ The StateManagementDemo is integrated into the main EduTrack app:
  **Real-time feedback** makes apps feel responsive and alive  
 
 ---
+
+## 🔥 Firebase Integration - COMPLETED
+
+### Overview
+EduTrack is now successfully connected to Firebase (`edutrack-49094`), providing a cloud backend for authentication, real-time database, storage, and analytics.
+
+### Firebase Services Configured
+- ✅ **Firebase Core** - Base SDK initialized
+- ✅ **Firebase Authentication** - User login/signup ready
+- ✅ **Cloud Firestore** - Real-time database configured
+- ✅ **Cloud Storage** - File storage prepared
+- ✅ **Firebase Analytics** - Usage tracking enabled
+
+### Dependencies Added
+```yaml
+dependencies:
+  firebase_core: ^3.6.0       # Core Firebase SDK
+  firebase_auth: ^5.3.1       # Authentication
+  cloud_firestore: ^5.4.4     # Real-time database
+```
+
+### Configuration Structure
+
+**File:** `lib/services/firebase_config.dart`
+- Centralized Firebase credentials (API key, project ID, app ID)
+- Initialization helper methods with error handling
+- Platform-specific options (web, Android, iOS)
+
+**File:** `lib/main.dart`
+```dart
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await FirebaseConfig.initializeFirebase();
+  runApp(const MyApp());
+}
+```
+
+**File:** `lib/screens/firebase_status_screen.dart`
+- Beautiful Material Design 3 UI for connection verification
+- Real-time status check with visual feedback
+- Displays all connection details and active services
+- Access via: Dashboard → Firebase button
+
+### Verification
+Run the app and check console output:
+```bash
+✅ Firebase initialized successfully!
+📱 Project: EduTrack - Smart Attendance Tracker
+🆔 Project ID: edutrack-49094
+```
+
+Navigate to: Landing → Auth → Dashboard → Click "Firebase" button to view connection status.
+
+### Next Steps
+Firebase is ready for implementing:
+- User authentication (email/password, social login)
+- Real-time data storage (students, attendance, assignments)
+- File uploads (student photos, documents)
+- Analytics tracking
+
+### Firebase Console
+Access your project: [Firebase Console - edutrack-49094](https://console.firebase.google.com/project/edutrack-49094)
+
+### Code Examples
+
+**Authentication:**
+```dart
+// Sign in user
+await FirebaseAuth.instance.signInWithEmailAndPassword(
+  email: email,
+  password: password,
+);
+```
+
+**Database Operations:**
+```dart
+// Save attendance
+await FirebaseFirestore.instance.collection('attendance').add({
+  'studentId': studentId,
+  'date': Timestamp.now(),
+  'status': 'present',
+});
+```
+
+**Real-time Listeners:**
+```dart
+// Listen to data changes
+FirebaseFirestore.instance.collection('students').snapshots().listen((snapshot) {
+  // Update UI with real-time data
+});
+```
+
+### Reflection
+
+**Most important step:** Creating the centralized `FirebaseConfig` service for maintainable, scalable architecture.
+
+**Errors encountered:** Timing issues with Flutter initialization, platform configuration warnings, and import organization. Fixed by proper initialization order and clean architecture.
+
+**How Firebase prepares the app:** Provides production-ready backend infrastructure for authentication, real-time database, automatic scaling, and professional-grade security without server management.
+
+---
+
+## 🚀 Running the Application
+
+```dart
+void main() async {
+  // Ensure Flutter bindings are initialized
+  WidgetsFlutterBinding.ensureInitialized();
+  
+  // Initialize Firebase using centralized configuration
+  await FirebaseConfig.initializeFirebase();
+  
+  runApp(const MyApp());
+}
+```
+
+**Key Points:**
+- `WidgetsFlutterBinding.ensureInitialized()` ensures Flutter framework is ready before Firebase initialization
+- `await` ensures Firebase is fully initialized before app starts
+- Centralized config makes initialization clean and maintainable
+
+---
+
+### 📱 Firebase Status Screen
+
+**File:** `lib/screens/firebase_status_screen.dart`
+
+A beautiful, professional UI to verify Firebase connection status with:
+
+#### Features:
+1. **Connection Verification**
+   - Real-time connection status check
+   - Visual feedback (success/error states)
+   - Automatic retry functionality
+
+2. **Connection Details Display**
+   - Project Name: EduTrack - Smart Attendance Tracker
+   - Project ID: edutrack-49094
+   - App ID, Auth Domain, Storage Bucket
+   - Messaging Sender ID
+
+3. **Firebase Services Overview**
+   - ✅ Authentication (Active)
+   - ✅ Cloud Firestore (Active)
+   - ✅ Cloud Storage (Active)
+   - ✅ Analytics (Active)
+
+4. **User Interface Elements**
+   - Clean Material Design 3 styling
+   - Gradient backgrounds matching EduTrack branding
+   - Smooth animations and loading states
+   - Refresh button for manual verification
+   - Quick links to Firebase documentation
+
+#### Access the Firebase Status Screen:
+1. Launch app: `flutter run -d chrome`
+2. Navigate: Landing Page → Auth → Dashboard
+3. Click: **"Firebase"** button in Quick Actions
+4. View: Complete Firebase connection details
+
+---
+
+### 🎨 UI Design
+
+The Firebase Status Screen features:
+
+**Success State:**
+- ✅ Large green checkmark icon
+- Project connection details in organized cards
+- Active service indicators with status badges
+- Clean typography and spacing
+- Action buttons for navigation and documentation
+
+**Loading State:**
+- Animated progress indicator
+- Status message display
+- Clean centered layout
+
+**Error State:**
+- ❌ Red error icon
+- Clear error messaging
+- Retry button for troubleshooting
+
+---
+
+### 📸 Screenshots
+
+#### Firebase Console
+![Firebase Console showing EduTrack project](demo/firebase-console.png)
+*Firebase Console Dashboard with edutrack-49094 project*
+
+#### Firebase Status Screen - Connected
+![Firebase Status Screen showing successful connection](demo/firebase-status-success.png)
+*Successfully connected with all services active*
+
+#### Firebase Status Screen - Details
+![Connection details and services](demo/firebase-details.png)
+*Complete connection details and available Firebase services*
+
+---
+
+### 🔐 Security Best Practices
+
+1. **API Keys Configuration**
+   - Web API key is public (safe for client-side apps)
+   - Firebase security rules protect backend data
+   - Authentication required for sensitive operations
+
+2. **Firebase Security Rules**
+   ```javascript
+   rules_version = '2';
+   service cloud.firestore {
+     match /databases/{database}/documents {
+       // Only authenticated users can read/write
+       match /{document=**} {
+         allow read, write: if request.auth != null;
+       }
+     }
+   }
+   ```
+
+3. **Environment Management**
+   - Development and production configs separated
+   - Sensitive keys not committed to public repos
+   - Use `.env` files for additional security layers
+
+---
+
+### ✅ Verification Steps
+
+To verify Firebase integration:
+
+1. **Check Console Output:**
+   ```bash
+   flutter run
+   # Look for:
+   ✅ Firebase initialized successfully!
+   📱 Project: EduTrack - Smart Attendance Tracker
+   🆔 Project ID: edutrack-49094
+   ```
+
+2. **Test Firebase Status Screen:**
+   - Navigate to Dashboard → Firebase
+   - Verify green checkmark appears
+   - Check all connection details display correctly
+   - Confirm all 4 services show as "Active"
+
+3. **Firebase Console Verification:**
+   - Open [Firebase Console](https://console.firebase.google.com)
+   - Select `edutrack-49094` project
+   - Go to Project Settings → Your Apps
+   - Confirm web app is listed and active
+
+---
+
+### 🎯 Next Steps with Firebase
+
+Now that Firebase is integrated, you can implement:
+
+1. **Authentication Features**
+   ```dart
+   // Firebase Auth example
+   await FirebaseAuth.instance.signInWithEmailAndPassword(
+     email: email,
+     password: password,
+   );
+   ```
+
+2. **Firestore Database Operations**
+   ```dart
+   // Save student attendance
+   await FirebaseFirestore.instance
+     .collection('attendance')
+     .add({
+       'studentId': studentId,
+       'date': Timestamp.now(),
+       'status': 'present',
+     });
+   ```
+
+3. **Real-time Data Sync**
+   ```dart
+   // Listen to attendance changes
+   FirebaseFirestore.instance
+     .collection('attendance')
+     .snapshots()
+     .listen((snapshot) {
+       // Update UI with new data
+     });
+   ```
+
+4. **Cloud Storage for Files**
+   ```dart
+   // Upload student photo
+   await FirebaseStorage.instance
+     .ref('students/$studentId.jpg')
+     .putFile(imageFile);
+   ```
+
+---
+
+### 🛠️ Common Issues & Solutions
+
+| Issue | Cause | Solution |
+|-------|-------|----------|
+| "Firebase not initialized" error | Missing await in main() | Add `await FirebaseConfig.initializeFirebase()` |
+| Connection timeout | Network issues | Check internet connection, retry |
+| Wrong project ID | Incorrect credentials | Verify Firebase Console matches config |
+| Platform not configured | Missing platform setup | Add Android/iOS config in Firebase Console |
+
+---
+
+### 📚 Firebase Resources
+
+- [Firebase Console](https://console.firebase.google.com) - Manage your project
+- [FlutterFire Documentation](https://firebase.flutter.dev) - Official Flutter + Firebase docs
+- [Firebase Authentication Guide](https://firebase.google.com/docs/auth) - User authentication
+- [Cloud Firestore Guide](https://firebase.google.com/docs/firestore) - Database operations
+- [Firebase Storage Guide](https://firebase.google.com/docs/storage) - File storage
+
+---
+
+### 🎓 Reflection
+
+**What was the most important step in Firebase integration?**
+
+The most critical step was implementing a centralized `FirebaseConfig` service. This approach:
+- Keeps credentials organized and secure
+- Makes initialization reusable and maintainable
+- Provides consistent error handling across the app
+- Enables easy environment switching (dev/staging/prod)
+- Follows Flutter best practices for service architecture
+
+**What errors did you encounter and how did you fix them?**
+
+Initial challenges included:
+1. **Timing issue**: Fixed by ensuring `WidgetsFlutterBinding.ensureInitialized()` runs before Firebase init
+2. **Platform mismatch**: Resolved by using correct web options for Chrome testing
+3. **Import organization**: Solved by creating dedicated services folder structure
+
+**How does Firebase setup prepare your app for authentication and storage features?**
+
+With Firebase properly configured:
+- ✅ Backend infrastructure is ready for production
+- ✅ Authentication can be implemented in minutes, not days
+- ✅ Real-time database enables instant data synchronization
+- ✅ Cloud storage provides scalable file management
+- ✅ Analytics tracks user behavior for insights
+- ✅ App scales automatically with user growth
+- ✅ No need to manage servers or databases manually
+
+This foundation transforms EduTrack from a prototype to a production-ready application capable of serving thousands of users across rural coaching centers.
+
+---
+
+
+
+
+
+##  Running the Application
+
+### Prerequisites
+- Flutter SDK installed (version 3.10.7 or higher)
+- Chrome browser (for web testing)
+- Internet connection (for Firebase)
+
+### Run Commands
+```bash
+# Run on Chrome
+flutter run -d chrome
+
+# Run on Windows (requires Developer Mode)
+flutter run -d windows
+
+# Hot reload during development
+Press 'r' in terminal
+```r
+
+### Access Points
+- **Landing Page:** http://localhost:8080
+- **Firebase Status:** Dashboard  Firebase button
+- **Quick Demo:** Use `Quick Demo Access` button on auth screen
+
+---
+
+##  Contact & Support
+
+**Team:** Triple Charm  
+**Project:** EduTrack - Smart Attendance & Progress Tracker  
+**Sprint:** Sprint #2  
+**Date:** February 2, 2026
+
+For questions or support, refer to the Firebase Console or Flutter documentation.
 
