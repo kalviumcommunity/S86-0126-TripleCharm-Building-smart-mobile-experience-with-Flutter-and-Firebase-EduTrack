@@ -398,6 +398,34 @@ flutter build apk --release
 
 ## ðŸŽ“ Sprint #2 Tasks Completion Status
 
+---
+
+## **Reusable Widgets**
+
+- **What:** Added a small set of reusable UI components under `lib/widgets/` (`CustomButton`, `InfoCard`, `LikeButton`).
+- **Why:** Reduce duplication and keep consistent styling across screens.
+- **Usage:** See [lib/widgets/README_WIDGETS.md](lib/widgets/README_WIDGETS.md) for examples and snippets.
+
+Commit: `feat: created and reused custom widgets for modular UI design`
+
+---
+
+## **Responsive Design Demo**
+
+- **What:** Implemented a dedicated responsive demo screen at [lib/screens/responsive_demo.dart](lib/screens/responsive_demo.dart#L1-L200) that demonstrates using `MediaQuery` for proportional sizing and `LayoutBuilder` for conditional layout switching (mobile vs tablet).
+- **How to test:**
+
+```bash
+flutter pub get
+flutter run
+```
+
+Open the app and navigate to the Responsive Demo screen (route `/responsive` if configured). Resize the emulator or run on a tablet emulator to observe the layout switching at ~600px width.
+
+- **Commit:** `feat: implemented responsive design using MediaQuery and LayoutBuilder`
+
+
+
 ### âœ… Task 1: Creating and Using Stateless and Stateful Widgets - COMPLETED
 
 #### Overview
@@ -2237,7 +2265,7 @@ After this task, you understand:
 
 ###  Overview
 
-In this task, you'll learn how to manage state in Flutter using the **setState()** method — the most fundamental technique for handling dynamic user interfaces. State management is what makes your app interactive: when a user taps a button, updates a value, or toggles an option, the UI changes instantly to reflect that new state.
+In this task, you'll learn how to manage state in Flutter using the **setState()** method ï¿½ the most fundamental technique for handling dynamic user interfaces. State management is what makes your app interactive: when a user taps a button, updates a value, or toggles an option, the UI changes instantly to reflect that new state.
 
 **File Created:** [lib/screens/state_management_demo.dart](lib/screens/state_management_demo.dart)
 
@@ -2648,11 +2676,11 @@ setState(() {
 
 **Q1: What is the key difference between Stateless and Stateful widgets?**
 
-*Answer:* Stateless widgets are immutable and don't change once built — think of them as frozen snapshots. Stateful widgets can change dynamically based on user interactions or data updates. Stateful widgets have an associated State class that holds mutable data and can trigger rebuilds using setState().
+*Answer:* Stateless widgets are immutable and don't change once built ï¿½ think of them as frozen snapshots. Stateful widgets can change dynamically based on user interactions or data updates. Stateful widgets have an associated State class that holds mutable data and can trigger rebuilds using setState().
 
 **Q2: Why is setState() important for Flutter's reactive model?**
 
-*Answer:* setState() is the bridge between data changes and UI updates in Flutter. It tells the framework that a variable changed and the widget needs rebuilding. Without setState(), the UI wouldn't reflect state changes — the app would be unresponsive. setState() enables the reactive, declarative programming model that makes Flutter powerful.
+*Answer:* setState() is the bridge between data changes and UI updates in Flutter. It tells the framework that a variable changed and the widget needs rebuilding. Without setState(), the UI wouldn't reflect state changes ï¿½ the app would be unresponsive. setState() enables the reactive, declarative programming model that makes Flutter powerful.
 
 **Q3: How can improper use of setState() affect performance?**
 
