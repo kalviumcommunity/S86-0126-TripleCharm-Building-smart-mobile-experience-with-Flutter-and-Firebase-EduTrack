@@ -275,11 +275,143 @@ New Firebase SDKs will use the configuration in `lib/firebase_options.dart`.
 
 > **README Guidelines for this repo:**
 >
-> - Add the **Project Title** and purpose of the Firebase CLI integration
-> - Document steps performed: installation, login, configuration, initialization
-> - Include the `main.dart` snippet shown above
-> - Add a screenshot of terminal logs or Firebase Console showing successful SDK setup
-> - Reflect on the setup: How the FlutterFire CLI simplified integration; errors faced and how you resolved them; why CLI-based setup is preferred over manual configuration
+>- Add the **Project Title** and purpose of the Firebase CLI integration
+>- Document steps performed: installation, login, configuration, initialization
+>- Include the `main.dart` snippet shown above
+>- Add a screenshot of terminal logs or Firebase Console showing successful SDK setup
+>- Reflect on the setup: How the FlutterFire CLI simplified integration; errors faced and how you resolved them; why CLI-based setup is preferred over manual configuration
+
+---
+
+## **Firebase Integration Lesson — Step-by-step**
+
+This section walks through creating a Firebase project, linking it to this Flutter app (manual + FlutterFire CLI), initializing Firebase, and verifying the connection in the Firebase Console. Follow the manual Android steps OR use the FlutterFire CLI (recommended) — both are documented below.
+
+### 1) What is Firebase?
+Firebase is a Google cloud platform that provides modular services for mobile/web apps: Authentication, Firestore (database), Cloud Storage, Cloud Functions, Hosting, Analytics and more.
+
+### 2) Create a Firebase Project (Console)
+- Go to the Firebase Console: https://console.firebase.google.com
+- Click **Add project** → **Create new project**, give it a name (e.g., `smart_mobile_app`) and follow the prompts.
+- Optionally enable Google Analytics for the project.
+
+### 3) Register Your Android App (Manual)
+1. In Firebase → Project settings → Your apps → **Add app** → **Android**.
+2. Use the Android package name from `android/app/build.gradle` (the `applicationId`). Example: `com.example.smartmobileapp`.
+3. (Optional) Add an app nickname and register.
+4. Download `google-services.json` and place it at:
+
+```
+android/app/google-services.json
+```
+
+### 4) Android Gradle plugin changes (Manual)
+- In `android/build.gradle` (project-level) ensure you have the Google services classpath in `dependencies`:
+
+```
+buildscript {
+  dependencies {
+    classpath 'com.google.gms:google-services:4.4.0' // or latest
+  }
+}
+```
+
+- In `android/app/build.gradle` apply the plugin at the bottom of the file:
+
+```
+apply plugin: 'com.google.gms.google-services'
+```
+
+> Note: Android builds using Kotlin DSL (build.gradle.kts) may require the equivalent plugin lines. See Firebase Android docs if your project uses Kotlin DSL.
+
+### 5) Add Firebase SDKs to Flutter
+- Edit `pubspec.yaml` and add (example versions):
+
+```yaml
+dependencies:
+  firebase_core: ^3.6.0
+  firebase_auth: ^5.3.1
+  cloud_firestore: ^5.4.4
+```
+
+Run:
+
+```bash
+flutter pub get
+```
+
+### 6) Initialize Firebase in `main.dart`
+Add initialization before `runApp()` (example using generated options or manual `FirebaseOptions`):
+
+```dart
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform, // if using flutterfire configure
+    // or use manual FirebaseOptions for web/android as needed
+  );
+  runApp(const MyApp());
+}
+```
+
+If you used the FlutterFire CLI (`flutterfire configure`) it generates `lib/firebase_options.dart` and the recommended snippet above.
+
+### 7) Verify Firebase Connection
+1. Run the app on an emulator, device, or web:
+
+```bash
+flutter run
+```
+
+2. Verification points:
+- Look for console logs: `Firebase initialized` or similar messages printed by `main()`.
+- In Firebase Console → Project settings → Your apps: the app should appear as a registered instance.
+- Firebase Analytics/Debug logs will show activity when running on a real device.
+
+### 8) Optional: iOS and Web
+- iOS: Add `GoogleService-Info.plist` to `ios/Runner/` and follow CocoaPods steps from Firebase docs.
+- Web: Run `flutterfire configure` to generate web config or manually add Firebase web options.
+
+### 9) Common Errors and Fixes
+| Error | Cause | Fix |
+|---|---|---|
+| `google-services.json not found` | File placed incorrectly | Move it to `android/app/google-services.json` |
+| Firebase not initialized | Missing `await Firebase.initializeApp()` | Add initialization before `runApp()` and await it |
+| Plugin not found / Build fails | Gradle or Google Services plugin mismatch | Update Gradle and add `com.google.gms:google-services` classpath and plugin |
+| Wrong package name | Package name in Firebase doesn't match app ID | Ensure Firebase app package matches `applicationId` in `android/app/build.gradle` |
+
+---
+
+## **Submission Guidelines (Sprint-2 Firebase Integration)**
+
+Follow these steps to create your PR and submit the assignment:
+
+1. Commit your changes with a clear message:
+
+```bash
+git add .
+git commit -m "feat: connected Flutter app with Firebase project"
+git push -u origin <your-branch>
+```
+
+2. Create a Pull Request titled:
+
+```
+[Sprint-2] Firebase Integration Setup – TeamName
+```
+
+3. In the PR description include:
+- Short summary of steps performed (Console or FlutterFire CLI).
+- Screenshot(s) showing Firebase Console with the registered app (or the `firebase initialized` log).
+- A brief reflection: main challenge, how you fixed any errors, and what this enables (Auth, Firestore, Storage).
+- Link to a short 1–2 minute demo video (unlisted) showing the running app and Firebase Console.
+
+4. Record a short demo (1–2 minutes):
+- Show the app running on emulator/device (or Chrome) and open Firebase Console → Project → Settings → Your Apps to confirm the connection.
+- Narrate where `google-services.json`/`GoogleService-Info.plist` goes and where `Firebase.initializeApp()` is called.
+- Upload to Google Drive, Loom, or YouTube (unlisted) and include the link in the PR.
+
+Pro tip: Make sure the video link is set to "Anyone with the link".
 
 ---
 
