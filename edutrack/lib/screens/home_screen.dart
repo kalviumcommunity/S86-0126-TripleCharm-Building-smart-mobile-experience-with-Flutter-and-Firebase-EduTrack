@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../widgets/custom_button.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -48,23 +49,19 @@ class HomeScreen extends StatelessWidget {
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 32),
-              ElevatedButton.icon(
+              CustomButton(
+                label: 'Go to Second Screen',
+                icon: Icons.arrow_forward,
+                color: const Color(0xFF6C63FF),
                 onPressed: () {
                   Navigator.pushNamed(context, '/second');
                 },
-                icon: const Icon(Icons.arrow_forward),
-                label: const Text('Go to Second Screen'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF6C63FF),
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 32,
-                    vertical: 16,
-                  ),
-                ),
               ),
               const SizedBox(height: 16),
-              ElevatedButton.icon(
+              CustomButton(
+                label: 'Go to Profile (with data)',
+                icon: Icons.person,
+                color: const Color(0xFF00D4FF),
                 onPressed: () {
                   Navigator.pushNamed(
                     context,
@@ -72,16 +69,6 @@ class HomeScreen extends StatelessWidget {
                     arguments: 'John Doe',
                   );
                 },
-                icon: const Icon(Icons.person),
-                label: const Text('Go to Profile (with data)'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF00D4FF),
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 32,
-                    vertical: 16,
-                  ),
-                ),
               ),
               const SizedBox(height: 16),
               OutlinedButton.icon(
@@ -114,19 +101,14 @@ class HomeScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 16),
-              OutlinedButton.icon(
+              CustomButton(
+                label: 'View Widget Demo',
+                icon: Icons.widgets,
+                outline: true,
+                color: const Color(0xFF6C63FF),
                 onPressed: () {
                   Navigator.pushNamed(context, '/demo');
                 },
-                icon: const Icon(Icons.widgets),
-                label: const Text('View Widget Demo'),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: const Color(0xFF6C63FF),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 32,
-                    vertical: 16,
-                  ),
-                ),
               ),
               const SizedBox(height: 16),
               OutlinedButton.icon(
