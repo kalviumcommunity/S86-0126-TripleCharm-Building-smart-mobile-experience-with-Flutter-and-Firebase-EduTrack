@@ -7,10 +7,14 @@ import 'login_screen.dart';
 // Debug logging constant
 const String _debugTag = '[DashboardScreen]';
 
+/// Dashboard Screen - Authenticated Home Screen
+/// Uses FirebaseAuth.instance.currentUser instead of passing User as parameter
+/// This ensures we always get the current authenticated user
 class DashboardScreen extends StatefulWidget {
-  final User user;
+  // Optional User parameter for backward compatibility
+  final User? user;
   
-  const DashboardScreen({super.key, required this.user});
+  const DashboardScreen({super.key, this.user});
 
   @override
   State<DashboardScreen> createState() => _DashboardScreenState();
@@ -25,12 +29,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Map<String, dynamic>? _userData;
   List<Map<String, dynamic>> _students = [];
   bool _isLoading = true;
+  bool _isLoggingOut = false;
 
   @override
   void initState() {
     super.initState();
+    final currentUser = FirebaseAuth.instance.currentUser;
     debugPrint('$_debugTag initState() called - Initializing Dashboard');
-    debugPrint('$_debugTag User ID: ${widget.user.uid}');
+    debugPrint('$_debugTag User ID: ${currentUser?.uid}');
     _loadUserData();
     _loadStudents();
   }
@@ -44,8 +50,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   Future<void> _loadUserData() async {
     try {
-      debugPrint('$_debugTag Loading user data for UID: ${widget.user.uid}');
-      final data = await _firestoreService.getUserData(widget.user.uid);
+      final currentUser = FirebaseAuth.instance.currentUser;
+      debugPrint('$_debugTag Loading user data for UID: ${currentUser?.uid}');
+      final data = await _firestoreService.getUserData(currentUser!.uid);
       debugPrint('$_debugTag User data loaded successfully: ${data?['name']}');
       setState(() {
         _userData = data;
@@ -84,16 +91,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Future<void> _handleLogout() async {
+    // Get current user from FirebaseAuth
+    final User? currentUser = FirebaseAuth.instance.currentUser;
+    
     try {
-      debugPrint('$_debugTag User logout initiated - ${widget.user.email}');
+      debugPrint('$_debugTag User logout initiated - ${currentUser?.email}');
       await _authService.logout();
-      debugPrint('$_debugTag Logout successful, redirecting to login screen');
-      if (mounted) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const LoginScreen()),
-        );
-      }
+      debugPrint('$_debugTag Logout successful, StreamBuilder will handle navigation');
+      // StreamBuilder in main.dart will detect null user and navigate to AuthScreen
+      // No need for manual navigation
     } catch (e) {
       debugPrint('$_debugTag ERROR during logout: $e');
       _showSnackBar('Logout failed: $e', isError: true);
@@ -140,10 +146,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   _studentClassController.text.isNotEmpty) {
                 try {
                   debugPrint('$_debugTag Adding new student: ${_studentNameController.text}');
+                  final currentUser = FirebaseAuth.instance.currentUser;
                   await _firestoreService.addStudent({
                     'name': _studentNameController.text.trim(),
                     'class': _studentClassController.text.trim(),
-                    'teacherId': widget.user.uid,
+                    'teacherId': currentUser!.uid,
                   });
                   debugPrint('$_debugTag Student added successfully');
                   Navigator.pop(context);
@@ -240,7 +247,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                       ),
                                       const SizedBox(height: 4),
                                       Text(
-                                        widget.user.email ?? '',
+                                        FirebaseAuth.instance.currentUser?.email ?? '',
                                         style: TextStyle(
                                           fontSize: 14,
                                           color: Colors.grey[600],

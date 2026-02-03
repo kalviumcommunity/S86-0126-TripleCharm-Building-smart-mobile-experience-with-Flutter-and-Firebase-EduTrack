@@ -1,18 +1,6 @@
 import 'package:flutter/material.dart';
-import 'services/firebase_config.dart';
-import 'screens/landing_page.dart';
-import 'screens/auth_screen.dart';
-import 'screens/dashboard.dart';
-import 'screens/students_screen.dart';
-import 'screens/attendance_screen.dart';
-import 'screens/assignments_screen.dart';
-import 'screens/grades_screen.dart';
-import 'screens/reports_screen.dart';
-import 'screens/profile_screen.dart';
-import 'screens/user_input_form.dart';
-import 'screens/state_management_demo.dart';
-import 'screens/scrollable_views.dart';
-import 'screens/firebase_status_screen.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'screens/welcome_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/stateless_stateful_demo.dart';
@@ -25,13 +13,33 @@ import 'screens/second_screen.dart';
 import 'screens/responsive_layout.dart';
 import 'screens/responsive_demo.dart';
 import 'screens/asset_demo.dart';
+import 'screens/scrollable_views.dart';
+import 'screens/user_input_form.dart';
+import 'screens/state_management_demo.dart';
+import 'screens/auth_screen.dart';
+import 'screens/dashboard_screen.dart';
 
 void main() async {
   // Ensure Flutter bindings are initialized
   WidgetsFlutterBinding.ensureInitialized();
   
-  // Initialize Firebase using centralized configuration
-  await FirebaseConfig.initializeFirebase();
+  // Initialize Firebase with EduTrack project credentials
+  try {
+    await Firebase.initializeApp(
+      options: const FirebaseOptions(
+        apiKey: "AIzaSyBl3NM09aQJPORl49l4blRJOn8QzAu-H8E",
+        authDomain: "edutrack-49094.firebaseapp.com",
+        projectId: "edutrack-49094",
+        storageBucket: "edutrack-49094.firebasestorage.app",
+        messagingSenderId: "900631831881",
+        appId: "1:900631831881:web:550307fdcf6a3c9562e698",
+        measurementId: "G-E3ZNGK3ETD",
+      ),
+    );
+    print('✅ Firebase initialized successfully!');
+  } catch (e) {
+    print('❌ Firebase initialization error: $e');
+  }
   
   runApp(const MyApp());
 }
@@ -52,29 +60,31 @@ class MyApp extends StatelessWidget {
           elevation: 2,
         ),
       ),
-      // Start with Landing Page - Proper User Flow
-      initialRoute: '/',
-      // Define all named routes in sequential order
+      // Use StreamBuilder to listen to authentication state changes
+      // This enables real-time navigation without manual routing
+      home: StreamBuilder<User?>(
+        stream: FirebaseAuth.instance.authStateChanges(),
+        builder: (context, snapshot) {
+          // Show loading while checking authentication state
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Scaffold(
+              body: Center(
+                child: CircularProgressIndicator(),
+              ),
+            );
+          }
+
+          // If user is logged in, show dashboard
+          if (snapshot.hasData) {
+            return const DashboardScreen();
+          }
+
+          // If user is not logged in, show authentication screen
+          return const AuthScreen();
+        },
+      ),
+      // Additional named routes for navigation demo
       routes: {
-        // Main App Flow (Sequential)
-        '/': (context) => const LandingPage(),
-        '/auth': (context) => const AuthScreen(),
-        '/login': (context) => const AuthScreen(),
-        '/dashboard': (context) => const DashboardScreen(),
-        
-        // Core Features
-        '/students': (context) => const StudentsScreen(),
-        '/attendance': (context) => const AttendanceScreen(),
-        '/assignments': (context) => const AssignmentsScreen(),
-        '/grades': (context) => const GradesScreen(),
-        '/reports': (context) => const ReportsScreen(),
-        '/profile': (context) => const ProfileScreen(),
-        '/user-input': (context) => const UserInputForm(),
-        '/state-management': (context) => const StateManagementDemo(),
-        '/scrollable': (context) => const ScrollableViews(),
-        '/firebase-status': (context) => const FirebaseStatusScreen(),
-        
-        // Demo/Learning Screens (accessible from dashboard quick actions)
         '/home': (context) => const HomeScreen(),
         '/second': (context) => const SecondScreen(),
         '/responsive': (context) => const ResponsiveLayout(),
@@ -83,8 +93,6 @@ class MyApp extends StatelessWidget {
         '/welcome': (context) => const WelcomeScreen(),
         '/demo': (context) => const StatelessStatefulDemoScreen(),
         '/old-login': (context) => const LoginScreen(),
-        
-        // Animation demos
         '/animations/container': (context) => const AnimatedContainerDemo(),
         '/animations/opacity': (context) => const AnimatedOpacityDemo(),
         '/animations/rotate': (context) => const RotateLogoDemo(),
