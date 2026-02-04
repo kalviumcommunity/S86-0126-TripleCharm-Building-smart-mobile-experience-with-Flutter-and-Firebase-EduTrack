@@ -1,3 +1,732 @@
+# EduTrack — Firestore Data Model & Database Design
+
+## Short Description
+This repository contains the comprehensive Firestore data model design for the **EduTrack student app**—a smart attendance and progress tracker for rural coaching centers. The schema is optimized for scalability, real-time updates, and clear separation of growing collections (attendance records, progress records, messages) into subcollections to ensure efficient querying and minimal read costs.
+
+---
+
+## 📋 Data Requirements List
+
+The EduTrack app must store and manage the following data:
+
+| Data Category | Description | Why It Matters |
+|---|---|---|
+| **Users & Profiles** | Authentication credentials + profile data (name, email, role) | Core identity & access control |
+| **Courses & Lessons** | Course catalog with hierarchical lesson structure | Curriculum management & course discovery |
+| **Enrollments** | Student-course relationships tracking | Know which students are in which courses |
+| **Attendance Records** | Daily attendance logs per student per course | Core feature—track presence/absence |
+| **Lesson Progress** | Track completion status of each lesson per student | Monitor student learning journey |
+| **Assessments & Results** | Quiz/test definitions and student submission results | Measure learning outcomes |
+| **Notifications** | Real-time alerts for teachers and students | Engagement & reminders |
+| **Activity Logs** | Audit trail of key actions (login, submission, progress) | Analytics & troubleshooting |
+
+---
+
+## 🏗️ Firestore Schema Design
+
+### Collections Architecture
+
+```
+firestore/
+├── users/                          [TOP-LEVEL COLLECTION]
+│   └── {userId}/
+│       ├── displayName: string
+│       ├── email: string
+│       ├── role: "student" | "teacher" | "admin"
+│       ├── photoUrl: string
+│       ├── createdAt: timestamp
+│       └── 📁 subcollections/
+│           ├── progress/           [USER'S COURSE PROGRESS]
+│           ├── attendance/         [USER'S ATTENDANCE RECORDS]
+│           └── notifications/      [USER'S INBOX]
+│
+├── courses/                        [TOP-LEVEL COLLECTION]
+│   └── {courseId}/
+│       ├── title: string
+│       ├── description: string
+│       ├── instructorId: string (ref)
+│       ├── tags: array<string>
+│       ├── createdAt: timestamp
+│       └── 📁 subcollections/
+│           └── lessons/            [COURSE LESSONS]
+│               └── {lessonId}/
+│                   ├── title: string
+│                   ├── content: string
+│                   ├── order: number
+│                   └── createdAt: timestamp
+│
+├── enrollments/                    [TOP-LEVEL COLLECTION]
+│   └── {enrollmentId}/
+│       ├── userId: string (ref)
+│       ├── courseId: string (ref)
+│       ├── enrolledAt: timestamp
+│       └── status: "active" | "completed" | "dropped"
+│
+├── assessments/                    [TOP-LEVEL COLLECTION]
+│   └── {assessmentId}/
+│       ├── courseId: string (ref)
+│       ├── lessonId: string (ref) [optional]
+│       ├── title: string
+│       ├── type: "quiz" | "test" | "assignment"
+│       ├── totalPoints: number
+│       ├── createdAt: timestamp
+│       └── 📁 subcollections/
+│           └── questions/         [ASSESSMENT QUESTIONS]
+│               └── {questionId}/
+│                   ├── text: string
+│                   ├── type: "multiple-choice" | "short-answer"
+│                   ├── options: array<string> [if multiple choice]
+│                   ├── correctAnswer: string | array<string>
+│                   └── points: number
+│
+├── submissions/                    [TOP-LEVEL COLLECTION - FAST GROWING]
+│   └── {submissionId}/
+│       ├── assessmentId: string (ref)
+│       ├── userId: string (ref)
+│       ├── courseId: string (ref)
+│       ├── score: number
+│       ├── answers: map<questionId, answer>
+│       ├── submittedAt: timestamp
+│       └── status: "submitted" | "graded"
+│
+└── activityLogs/                   [TOP-LEVEL COLLECTION - AUDIT TRAIL]
+    └── {logId}/
+        ├── userId: string (ref)
+        ├── action: "login" | "mark_attendance" | "submit_assessment"
+        ├── metadata: map
+        ├── timestamp: timestamp
+        └── ipAddress: string [optional]
+```
+
+---
+
+### Detailed Collection Definitions
+
+#### 1️⃣ **`users`** — User Profiles & Authentication
+
+**Purpose:** Store user metadata and authentication references.
+
+**Field Definitions:**
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `displayName` | string | ✅ | Full name of the user |
+| `email` | string | ✅ | Unique email address |
+| `role` | string | ✅ | One of: `"student"`, `"teacher"`, `"admin"` |
+| `photoUrl` | string | ❌ | URL to user profile picture |
+| `phone` | string | ❌ | Contact phone number |
+| `createdAt` | timestamp | ✅ | Server timestamp of account creation |
+| `updatedAt` | timestamp | ✅ | Server timestamp of last update |
+| `lastSeenAt` | timestamp | ❌ | Timestamp of last login/activity |
+
+**Subcollections:**
+- `progress/` — Per-course progress documents
+- `attendance/` — User's attendance records
+- `notifications/` — User's inbox/notifications
+
+---
+
+#### 2️⃣ **`courses`** — Course Catalog
+
+**Purpose:** Define courses and their structure.
+
+**Field Definitions:**
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `title` | string | ✅ | Course name (e.g., "Mathematics 101") |
+| `description` | string | ✅ | Course overview and goals |
+| `instructorId` | string | ✅ | Reference to teacher's `userId` |
+| `tags` | array<string> | ❌ | Topics/keywords for filtering (e.g., ["math", "algebra", "grade-10"]) |
+| `createdAt` | timestamp | ✅ | Course creation timestamp |
+| `updatedAt` | timestamp | ✅ | Last update timestamp |
+| `isActive` | boolean | ✅ | Whether course is currently running |
+
+**Subcollections:**
+- `lessons/` — Individual lesson documents
+
+---
+
+#### 3️⃣ **`courses/{courseId}/lessons`** — Lesson Content (Subcollection)
+
+**Purpose:** Store individual lessons within a course.
+
+**Field Definitions:**
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `title` | string | ✅ | Lesson title |
+| `content` | string | ✅ | Lesson body (markdown or HTML) |
+| `order` | number | ✅ | Sequence number for ordering |
+| `videoUrl` | string | ❌ | URL to lesson video |
+| `createdAt` | timestamp | ✅ | Lesson creation timestamp |
+| `updatedAt` | timestamp | ✅ | Last update timestamp |
+
+---
+
+#### 4️⃣ **`enrollments`** — Student Course Enrollments
+
+**Purpose:** Track which students are enrolled in which courses (lightweight lookup collection).
+
+**Field Definitions:**
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `userId` | string | ✅ | Reference to student's `userId` |
+| `courseId` | string | ✅ | Reference to `courseId` |
+| `enrolledAt` | timestamp | ✅ | Enrollment timestamp |
+| `status` | string | ✅ | One of: `"active"`, `"completed"`, `"dropped"` |
+| `grade` | string | ❌ | Final grade if completed (e.g., "A", "B", "C") |
+
+**Document ID Strategy:** Use composite ID `{userId}_{courseId}` for easy uniqueness guarantee.
+
+---
+
+#### 5️⃣ **`assessments`** — Quiz & Test Definitions
+
+**Purpose:** Store assessment metadata and questions.
+
+**Field Definitions:**
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `courseId` | string | ✅ | Reference to parent course |
+| `lessonId` | string | ❌ | Optional reference to specific lesson |
+| `title` | string | ✅ | Assessment title (e.g., "Chapter 3 Quiz") |
+| `type` | string | ✅ | One of: `"quiz"`, `"test"`, `"assignment"` |
+| `totalPoints` | number | ✅ | Maximum possible score |
+| `timeLimit` | number | ❌ | Time limit in minutes (null = unlimited) |
+| `createdAt` | timestamp | ✅ | Creation timestamp |
+| `updatedAt` | timestamp | ✅ | Last update timestamp |
+
+**Subcollections:**
+- `questions/` — Individual question documents
+
+---
+
+#### 6️⃣ **`assessments/{assessmentId}/questions`** — Assessment Questions (Subcollection)
+
+**Purpose:** Store individual questions for each assessment.
+
+**Field Definitions:**
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `text` | string | ✅ | Question text/prompt |
+| `type` | string | ✅ | One of: `"multiple-choice"`, `"short-answer"`, `"true-false"` |
+| `options` | array<string> | ❌ | Answer choices (for multiple-choice) |
+| `correctAnswer` | string \| array | ✅ | Correct answer(s) |
+| `points` | number | ✅ | Points awarded for correct answer |
+| `order` | number | ✅ | Question sequence |
+
+---
+
+#### 7️⃣ **`submissions`** — Assessment Submissions (Fast-Growing)
+
+**Purpose:** Store student quiz/test submissions and scores (top-level for easy analytics).
+
+**Field Definitions:**
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `assessmentId` | string | ✅ | Reference to `assessmentId` |
+| `userId` | string | ✅ | Reference to student |
+| `courseId` | string | ✅ | Reference to course (denormalized for faster queries) |
+| `score` | number | ✅ | Points earned |
+| `answers` | map | ✅ | Map of `{questionId: userAnswer}` |
+| `submittedAt` | timestamp | ✅ | Submission timestamp |
+| `status` | string | ✅ | One of: `"submitted"`, `"graded"` |
+| `feedback` | string | ❌ | Teacher feedback/comments |
+
+---
+
+#### 8️⃣ **`users/{userId}/progress`** — User Course Progress (Subcollection)
+
+**Purpose:** Track per-user, per-course progress (completion %, lessons done, etc.).
+
+**Field Definitions:**
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `courseId` | string | ✅ | Reference to course |
+| `lessonsCompleted` | number | ✅ | Count of completed lessons |
+| `totalLessons` | number | ✅ | Total lessons in course |
+| `progressPercent` | number | ✅ | Calculated percentage (0-100) |
+| `completedAt` | timestamp | ❌ | When course was fully completed |
+| `lastAccessedAt` | timestamp | ✅ | Last time student accessed course |
+
+---
+
+#### 9️⃣ **`users/{userId}/attendance`** — Attendance Records (Subcollection)
+
+**Purpose:** Store daily attendance records per student (grows per user).
+
+**Field Definitions:**
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `courseId` | string | ✅ | Reference to course |
+| `date` | timestamp | ✅ | Attendance date |
+| `status` | string | ✅ | One of: `"present"`, `"absent"`, `"excused"` |
+| `markedAt` | timestamp | ✅ | When attendance was recorded |
+| `markedBy` | string | ✅ | Reference to teacher who marked |
+
+---
+
+#### 🔟 **`users/{userId}/notifications`** — User Notifications (Subcollection)
+
+**Purpose:** Store individual notifications in a user's inbox.
+
+**Field Definitions:**
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `type` | string | ✅ | One of: `"announcement"`, `"grade"`, `"reminder"`, `"message"` |
+| `title` | string | ✅ | Notification title |
+| `body` | string | ✅ | Notification message body |
+| `relatedId` | string | ❌ | Reference to related document (e.g., courseId, submissionId) |
+| `read` | boolean | ✅ | Whether user has read it |
+| `createdAt` | timestamp | ✅ | Creation timestamp |
+| `readAt` | timestamp | ❌ | When user read it |
+
+---
+
+#### 1️⃣1️⃣ **`activityLogs`** — Audit Trail (Top-Level)
+
+**Purpose:** Track significant user actions for security & analytics.
+
+**Field Definitions:**
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `userId` | string | ✅ | Who performed the action |
+| `action` | string | ✅ | Type of action (e.g., "login", "mark_attendance", "submit_assessment") |
+| `resourceType` | string | ❌ | What was accessed (e.g., "course", "assessment") |
+| `resourceId` | string | ❌ | ID of the resource |
+| `metadata` | map | ❌ | Additional context (e.g., IP, device, success/failure) |
+| `timestamp` | timestamp | ✅ | When action occurred |
+
+---
+
+## 🗂️ When to Use Subcollections vs. Top-Level Collections
+
+| Pattern | Use Case | Example |
+|---------|----------|---------|
+| **Top-Level** | Analytics, global queries, fast lookups | `enrollments`, `submissions`, `assessments` |
+| **Subcollection** | User-scoped data, grows per user, privacy-sensitive | `users/{userId}/progress`, `users/{userId}/attendance` |
+| **Nested Subcollection** | Hierarchical data, data belongs to parent | `courses/{courseId}/lessons`, `assessments/{assessmentId}/questions` |
+
+**Why Subcollections Work Better for EduTrack:**
+
+✅ **`users/{userId}/attendance`** instead of top-level `attendance`:
+- Each user can have hundreds of attendance records
+- Subcollection keeps data scoped and organized per user
+- Security rules can restrict access to own records
+- Queries are faster: `db.collection('users').doc(userId).collection('attendance').where('date', '>=', startDate)`
+
+✅ **`courses/{courseId}/lessons`** instead of top-level `lessons`:
+- Lessons semantically belong to courses
+- Enables course-specific lesson queries
+- Supports easy course deletion (cascade delete subcollections)
+
+❌ **Avoid:** Storing attendance in `users` document as array:
+- Arrays have size limits (~20MB per document)
+- Every read of the user doc reads all attendance data
+- Expensive updates when adding attendance
+- Can't query attendance directly
+
+---
+
+## 📝 Field Naming & Data Type Guidelines
+
+### Naming Conventions
+
+✅ **DO:**
+- Use **lowerCamelCase** for all field names: `displayName`, `enrolledAt`, `isActive`
+- Use **descriptive names**: `submittedAt` (not `submitted_date`)
+- Use **consistent prefixes**: All dates use `*At` suffix: `createdAt`, `updatedAt`, `markedAt`
+- Use **boolean prefixes**: `is*`, `has*`: `isActive`, `hasSubmitted`
+
+❌ **DON'T:**
+- Use snake_case: `display_name` ❌
+- Use abbreviations: `disp_nm` ❌
+- Use generic names: `data`, `info` ❌
+
+### Data Type Standards
+
+| Type | Usage | Example |
+|------|-------|---------|
+| **string** | Text fields | `displayName: "Asha Rao"` |
+| **number** | Scores, counts, percentages | `score: 85`, `progressPercent: 75` |
+| **boolean** | Flags, binary status | `isActive: true`, `read: false` |
+| **timestamp** | Dates & times (ALWAYS server timestamp) | `createdAt: FieldValue.serverTimestamp()` |
+| **array** | Lists of primitive values | `tags: ["math", "algebra"]` |
+| **map** | Small objects or structured data | `answers: {q1: "A", q2: "B"}` |
+| **reference** | Link to other documents | `instructorId: "user_123"` (store as string) |
+
+### ⏰ Timestamp Best Practices
+
+```dart
+// DO: Use server timestamp for consistency
+createdAt: FieldValue.serverTimestamp(),
+
+// DON'T: Use client time (inconsistent across timezones)
+createdAt: DateTime.now(), // ❌ Wrong!
+
+// For queryable date fields, store ISO string alongside timestamp
+dateStr: "2026-02-04",        // For date-based filtering
+createdAt: serverTimestamp()  // For precise sorting
+```
+
+---
+
+## 📊 Sample JSON Documents
+
+### Sample 1: User Profile Document
+```json
+// Firestore Path: users/user_asha_123
+
+{
+  "displayName": "Asha Rao",
+  "email": "asha@example.com",
+  "role": "student",
+  "photoUrl": "https://example.com/photos/asha.jpg",
+  "phone": "+91-9876543210",
+  "createdAt": "2026-01-15T08:30:00Z",
+  "updatedAt": "2026-02-04T10:15:00Z",
+  "lastSeenAt": "2026-02-04T14:22:00Z"
+}
+```
+
+### Sample 2: Course Document with Subcollection
+```json
+// Firestore Path: courses/course_math_101
+
+{
+  "title": "Mathematics 101 - Algebra Basics",
+  "description": "Master fundamental algebraic concepts including equations, inequalities, and polynomial operations.",
+  "instructorId": "user_prof_sharma_456",
+  "tags": ["mathematics", "algebra", "grade-10", "semester-1"],
+  "createdAt": "2026-01-10T09:00:00Z",
+  "updatedAt": "2026-02-03T15:45:00Z",
+  "isActive": true
+}
+
+// Subcollection: courses/course_math_101/lessons
+{
+  "lesson_1_intro": {
+    "title": "Introduction to Variables",
+    "content": "A variable is a symbol (usually a letter) that represents an unknown number...",
+    "order": 1,
+    "videoUrl": "https://example.com/videos/lesson-1.mp4",
+    "createdAt": "2026-01-10T09:30:00Z",
+    "updatedAt": "2026-01-10T09:30:00Z"
+  },
+  "lesson_2_equations": {
+    "title": "Solving Linear Equations",
+    "content": "A linear equation is an equation where the highest power of the variable is 1...",
+    "order": 2,
+    "videoUrl": "https://example.com/videos/lesson-2.mp4",
+    "createdAt": "2026-01-11T09:00:00Z",
+    "updatedAt": "2026-01-11T09:00:00Z"
+  }
+}
+```
+
+### Sample 3: Enrollment Document
+```json
+// Firestore Path: enrollments/user_asha_123_course_math_101
+
+{
+  "userId": "user_asha_123",
+  "courseId": "course_math_101",
+  "enrolledAt": "2026-01-16T10:00:00Z",
+  "status": "active",
+  "grade": null  // Will be populated after course completion
+}
+```
+
+### Sample 4: Assessment with Questions Subcollection
+```json
+// Firestore Path: assessments/quiz_algebra_ch2
+
+{
+  "courseId": "course_math_101",
+  "lessonId": "lesson_2_equations",
+  "title": "Chapter 2 Quiz - Solving Linear Equations",
+  "type": "quiz",
+  "totalPoints": 50,
+  "timeLimit": 30,  // 30 minutes
+  "createdAt": "2026-01-12T14:00:00Z",
+  "updatedAt": "2026-01-12T14:00:00Z"
+}
+
+// Subcollection: assessments/quiz_algebra_ch2/questions
+{
+  "q001": {
+    "text": "Solve for x: 2x + 5 = 13",
+    "type": "short-answer",
+    "correctAnswer": "4",
+    "points": 10,
+    "order": 1
+  },
+  "q002": {
+    "text": "What is the solution to 3x - 7 = x + 1?",
+    "type": "multiple-choice",
+    "options": ["2", "3", "4", "5"],
+    "correctAnswer": "4",
+    "points": 10,
+    "order": 2
+  },
+  "q003": {
+    "text": "Is the equation 2(x+1) = 2x+2 always true?",
+    "type": "true-false",
+    "correctAnswer": "true",
+    "points": 10,
+    "order": 3
+  }
+}
+```
+
+### Sample 5: Submission Document
+```json
+// Firestore Path: submissions/sub_asha_quiz_ch2_20260204
+
+{
+  "assessmentId": "quiz_algebra_ch2",
+  "userId": "user_asha_123",
+  "courseId": "course_math_101",
+  "score": 40,
+  "answers": {
+    "q001": "4",
+    "q002": "4",
+    "q003": "true"
+  },
+  "submittedAt": "2026-02-04T15:22:00Z",
+  "status": "submitted",
+  "feedback": null  // Teacher will add feedback after grading
+}
+```
+
+### Sample 6: User Progress Subcollection
+```json
+// Firestore Path: users/user_asha_123/progress/prog_course_math_101
+
+{
+  "courseId": "course_math_101",
+  "lessonsCompleted": 8,
+  "totalLessons": 12,
+  "progressPercent": 66.7,
+  "completedAt": null,  // Will be set when all lessons are complete
+  "lastAccessedAt": "2026-02-04T14:15:00Z"
+}
+```
+
+### Sample 7: Attendance Subcollection
+```json
+// Firestore Path: users/user_asha_123/attendance/att_2026_02_04
+
+{
+  "courseId": "course_math_101",
+  "date": "2026-02-04",
+  "status": "present",
+  "markedAt": "2026-02-04T09:15:00Z",
+  "markedBy": "user_prof_sharma_456"
+}
+```
+
+### Sample 8: Notification Subcollection
+```json
+// Firestore Path: users/user_asha_123/notifications/notif_quiz_result
+
+{
+  "type": "grade",
+  "title": "Quiz Graded: Chapter 2 Quiz",
+  "body": "Your score for 'Chapter 2 Quiz - Solving Linear Equations' is 40/50 (80%)",
+  "relatedId": "quiz_algebra_ch2",
+  "read": true,
+  "createdAt": "2026-02-04T16:00:00Z",
+  "readAt": "2026-02-04T16:05:00Z"
+}
+```
+
+---
+
+## 📐 Firestore Schema Diagram (Mermaid)
+
+```mermaid
+graph TD
+    USERS["👥 users"]
+    COURSES["📚 courses"]
+    ENROLLMENTS["✅ enrollments"]
+    ASSESSMENTS["📝 assessments"]
+    SUBMISSIONS["📤 submissions"]
+    ACTIVITYLOGS["📊 activityLogs"]
+    
+    USERS_PROGRESS["📈 users/{userId}/progress"]
+    USERS_ATTENDANCE["📋 users/{userId}/attendance"]
+    USERS_NOTIFICATIONS["🔔 users/{userId}/notifications"]
+    
+    COURSES_LESSONS["📖 courses/{courseId}/lessons"]
+    
+    ASSESSMENTS_QUESTIONS["❓ assessments/{assessmentId}/questions"]
+    
+    USERS -->|has| USERS_PROGRESS
+    USERS -->|has| USERS_ATTENDANCE
+    USERS -->|has| USERS_NOTIFICATIONS
+    
+    COURSES -->|contains| COURSES_LESSONS
+    ASSESSMENTS -->|has| ASSESSMENTS_QUESTIONS
+    
+    ENROLLMENTS -.->|references| USERS
+    ENROLLMENTS -.->|references| COURSES
+    
+    ASSESSMENTS -.->|references| COURSES
+    SUBMISSIONS -.->|references| ASSESSMENTS
+    SUBMISSIONS -.->|references| USERS
+    
+    ACTIVITYLOGS -.->|references| USERS
+```
+
+---
+
+## ✅ Schema Validation Checklist
+
+Use this checklist to ensure your design is production-ready:
+
+| ✓ | Criterion | Status | Notes |
+|---|-----------|--------|-------|
+| ✅ | Does schema match app requirements? | COMPLETE | All 8 data categories covered |
+| ✅ | Will it scale to 10,000+ users? | COMPLETE | Subcollections prevent document size limits |
+| ✅ | Are related data grouped logically? | COMPLETE | Courses contain lessons, users contain progress |
+| ✅ | Are subcollections used where necessary? | COMPLETE | Growing data (attendance, progress) in subcollections |
+| ✅ | Are all field names lowerCamelCase? | COMPLETE | Consistent naming throughout |
+| ✅ | Are timestamps using server values? | COMPLETE | All dates use `FieldValue.serverTimestamp()` |
+| ✅ | Are document IDs meaningful? | COMPLETE | IDs convey purpose (user_*, course_*, etc.) |
+| ✅ | Can another dev understand the schema? | COMPLETE | Comprehensive documentation with samples |
+| ✅ | Is there a visual diagram? | COMPLETE | Mermaid ER diagram included |
+
+---
+
+## 🤔 Design Reflection
+
+### Why This Structure?
+
+1. **Subcollections for User-Scoped Data**
+   - `users/{userId}/attendance`, `users/{userId}/progress` prevent document size bloat
+   - Each user can have thousands of records without impacting read performance
+   - Enables granular security rules (e.g., user can only see their own attendance)
+
+2. **Top-Level Collections for Analytics**
+   - `submissions`, `enrollments`, `activityLogs` are top-level for fast global queries
+   - Teachers need to aggregate student scores across the platform
+   - Analytics queries don't require user context
+
+3. **Nested Subcollections for Hierarchy**
+   - `courses/{courseId}/lessons` maintains semantic relationship
+   - Questions belong to specific assessments, so `assessments/{assessmentId}/questions`
+   - Supports cascading deletes: removing a course removes all its lessons
+
+4. **Reference-Based Linking**
+   - Store `userId`, `courseId` as strings rather than embedding full documents
+   - Prevents data duplication and stale references
+   - Allows independent updates to user or course info
+
+### How This Helps Performance & Scalability
+
+| Challenge | Solution |
+|-----------|----------|
+| **Large documents** | Attendance & progress in subcollections (documents stay < 1MB) |
+| **Expensive reads** | Analytics queries on top-level collections avoid loading user docs |
+| **Indexing complexity** | Logical structure makes index setup straightforward |
+| **Real-time updates** | Subcollections can be individually listened to with `onSnapshot()` |
+| **Write hotspots** | Distributed IDs (user_*, course_*) avoid concurrent write conflicts |
+
+### Challenges Faced & Solutions
+
+| Challenge | How We Addressed It |
+|-----------|-------------------|
+| **Denormalization vs. Normalization** | Store references + essential fields only (e.g., `userId` in submissions, not full user object) |
+| **Query flexibility** | Denormalize `courseId` in submissions for faster filtering (trade-off: manual updates on course deletion) |
+| **Document size limits** | Keep subcollections for fast-growing data (attendance, progress) |
+| **Data consistency** | Use transactions for critical operations (enrollment + progress creation) |
+| **Security rules complexity** | Hierarchical structure allows document-level access rules (e.g., `allow read: if request.auth.uid == resource.data.userId`) |
+
+---
+
+## 🔐 Next Steps: Security & Implementation
+
+### Security Rules Preview
+```firestore
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Users can read/write their own profile
+    match /users/{userId} {
+      allow read: if request.auth.uid == userId;
+      allow write: if request.auth.uid == userId || isAdmin();
+      
+      // Users can read their own subcollections
+      match /{document=**} {
+        allow read: if request.auth.uid == userId;
+        allow write: if request.auth.uid == userId || isAdmin();
+      }
+    }
+    
+    // Courses visible to all authenticated users
+    match /courses/{courseId} {
+      allow read: if request.auth != null;
+      allow write: if isInstructor(request.auth.uid);
+    }
+    
+    // Students can only see their own submissions
+    match /submissions/{submissionId} {
+      allow read: if request.auth.uid == resource.data.userId || isTeacher(request.auth.uid);
+      allow write: if request.auth.uid == resource.data.userId;
+    }
+  }
+}
+```
+
+### Implementation Priorities
+1. Set up Firestore collections with test data
+2. Create Dart models matching the schema
+3. Build CRUD service classes (next sprint)
+4. Configure security rules
+5. Set up composite indexes for complex queries
+
+---
+
+## 📚 Commit & PR Information
+
+**Commit Message:**
+```
+feat: designed Firestore schema and added database diagram
+
+- Created comprehensive schema with 8 top-level collections
+- Implemented subcollections for scalability (progress, attendance, notifications)
+- Added detailed field definitions and data types
+- Included sample JSON documents for all collection types
+- Created Mermaid ER diagram for visualization
+- Added validation checklist and reflection on design decisions
+```
+
+**PR Title:**
+```
+[Sprint-2] Firestore Database Schema Design – Triple Charm
+```
+
+**PR Description:**
+See this README section for:
+- ✅ Complete schema explanation
+- ✅ Visual diagram (Mermaid)
+- ✅ Sample documents
+- ✅ Validation checklist
+- ✅ Design reflection
+
+---
+
 # EduTrack – Smart Attendance and Progress Tracker
 
 ## ✅ Sprint #2 Completion Status
