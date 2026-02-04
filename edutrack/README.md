@@ -4379,6 +4379,81 @@ These documents include:
 
 ---
 
+## 📖 Reading Data from Firestore (IMPLEMENTED ✅)
+
+### Overview
+
+The EduTrack app now includes complete Firestore read functionality with:
+
+✅ **FirestoreService** - Core service layer with read operations  
+✅ **StudentListScreen** - Real-time student list with StreamBuilder  
+✅ **StudentDetailScreen** - Single student profile with FutureBuilder  
+✅ **AttendanceFeedScreen** - Real-time attendance feed with live updates  
+✅ **AttendanceStatsScreen** - Aggregated statistics from attendance data  
+✅ **Sample Data Helper** - Scripts to populate test data  
+
+### Key Read Patterns Implemented
+
+| Pattern | Use Case | Example |
+|---------|----------|---------|
+| **Single Document (FutureBuilder)** | Fetch one profile | `getStudent(studentId)` |
+| **Collection (FutureBuilder)** | Fetch all records once | `getAllStudents(centerId)` |
+| **Real-time Stream** | Live updates | `getStudentsStream(centerId)` |
+| **Filtered Query** | Filter with conditions | `getActiveStudents(centerId)` |
+| **Subcollection** | Nested data | `getCourseSchedule(courseId)` |
+| **Aggregated Stats** | Calculate from data | `getAttendanceStats(studentId)` |
+
+### Quick Start
+
+1. **Import the service:**
+   ```dart
+   import 'services/firestore_service.dart';
+   ```
+
+2. **Use StreamBuilder for real-time lists:**
+   ```dart
+   StreamBuilder<QuerySnapshot>(
+     stream: FirestoreService().getStudentsStream(centerId),
+     builder: (context, snapshot) {
+       final students = snapshot.data!.docs;
+       return ListView(children: students.map((doc) => StudentCard(doc)).toList());
+     },
+   )
+   ```
+
+3. **Use FutureBuilder for single reads:**
+   ```dart
+   FutureBuilder<Map<String, dynamic>?>(
+     future: FirestoreService().getStudent(studentId),
+     builder: (context, snapshot) {
+       final student = snapshot.data!;
+       return ProfileCard(student: student);
+     },
+   )
+   ```
+
+4. **Add sample data:**
+   ```dart
+   // In your app initialization or test button
+   await FirestoreSampleDataHelper.initializeSampleData();
+   ```
+
+### Documentation
+
+For detailed information, see:
+- **[FIRESTORE_READING_GUIDE.md](FIRESTORE_READING_GUIDE.md)** - Comprehensive guide with code examples
+- **[FIRESTORE_SCHEMA.md](FIRESTORE_SCHEMA.md)** - Database structure and design
+- **[FIRESTORE_SCHEMA_DIAGRAMS.md](FIRESTORE_SCHEMA_DIAGRAMS.md)** - Visual diagrams
+
+### Code References
+
+- **Service:** `lib/services/firestore_service.dart`
+- **UI Screens:** `lib/screens/student_list_screen.dart`
+- **Attendance:** `lib/screens/attendance_feed_screen.dart`
+- **Sample Data:** `lib/examples/firestore_sample_data.dart`
+
+---
+
 
 
 
