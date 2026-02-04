@@ -3369,6 +3369,155 @@ This foundation transforms EduTrack from a prototype to a production-ready appli
 
 ---
 
+## 🗄️ Cloud Firestore Database Schema Design
+
+### Overview
+
+EduTrack uses **Cloud Firestore** (Firebase's NoSQL database) to manage all app data including student records, attendance tracking, academic progress, courses, and coaching center information. The database is designed for real-time updates, scalability, and intuitive querying.
+
+### Key Design Principles
+
+✅ **Real-time Synchronization** - Attendance updates instantly across all devices  
+✅ **Scalability** - Handles 1000+ students and 100,000+ monthly records  
+✅ **Performance** - Strategic denormalization and indexing for fast queries  
+✅ **Simplicity** - Clear hierarchical structure easy for developers to understand  
+✅ **Offline-first** - Cached data helps mobile app work without internet  
+
+### Collections Overview
+
+| Collection | Purpose | Scale | Example |
+|------------|---------|-------|---------|
+| **coachingCenters** | Organization metadata | 1-100 docs | Center name, address, admin |
+| **users** | Teachers, admins, staff | 10-100 docs | Profile, role, department |
+| **students** | Student profiles | 100-1000 docs | Name, contact, enrollment status |
+| **courses** | Course/subject info | 10-50 docs | Name, instructor, level |
+| **enrollments** | Student-course links | 100-5000 docs | Status, grade, attendance % |
+| **attendance** | Daily attendance | 10,000-100,000+ docs | Present/absent/late, date |
+| **progress** | Grades and scores | 1,000-10,000 docs | Marks, grade, assessment type |
+| **classRooms** | Physical/virtual rooms | 5-50 docs | Name, capacity, location |
+
+### Data Requirements
+
+EduTrack tracks:
+- 👥 **User Management** - Teachers, admins with roles and permissions
+- 📚 **Student Profiles** - Enrollment, contact, personal info
+- 📖 **Courses** - Subjects, schedules, assignments, instructors
+- ✅ **Attendance** - Daily presence tracking per course per student
+- 📊 **Academic Progress** - Grades, test scores, assessments
+- 🏛️ **Facilities** - Classroom management and scheduling
+
+### Sample Firestore Structure
+
+```
+coachingCenters/{centerId}
+  ├── name: "Sharma Coaching Center"
+  ├── city: "Jaipur"
+  └── stats/ (subcollection)
+
+users/{userId}
+  ├── email: "teacher@example.com"
+  ├── role: "teacher"
+  └── centerId: (reference to coachingCenter)
+
+students/{studentId}
+  ├── name: "Asha Sharma"
+  ├── rollNumber: "STU-2024-001"
+  ├── centerId: (reference)
+  └── enrollments/ (subcollection)
+      ├── {enrollmentId}
+      │   ├── courseId: (reference)
+      │   ├── status: "active"
+      │   └── scorePercentage: 87.3
+
+courses/{courseId}
+  ├── name: "Mathematics - Class 10"
+  ├── instructorId: (reference)
+  ├── schedule/ (subcollection - class sessions)
+  └── assignments/ (subcollection)
+
+attendance/{attendanceId}
+  ├── studentId: (reference)
+  ├── courseId: (reference)
+  ├── classDate: "2024-02-03"
+  └── status: "present"
+
+progress/{progressId}
+  ├── studentId: (reference)
+  ├── courseId: (reference)
+  ├── assessmentTitle: "Unit Test 1"
+  ├── obtainedMarks: 87
+  └── totalMarks: 100
+```
+
+### Design Decisions Explained
+
+**Why Subcollections for Enrollments?**
+- Student may enroll in 5-10 courses. Subcollections avoid array size limits
+- Real-time updates work efficiently on nested data
+- Each enrollment can grow independently (assignments submitted, etc.)
+
+**Why Separate Attendance & Progress Collections?**
+- Attendance is high-volume time-series data (1000s daily)
+- Avoids bloating student documents with 10,000+ records
+- Enables efficient date-range queries for reports
+- Can be archived independently
+
+**Why Cache Fields Like studentName?**
+- Prevents N+1 queries when loading attendance reports
+- Enables offline app functionality
+- Minimal denormalization (only critical fields cached)
+- Trade-off: Updates require batch writes
+
+**Why Composite Indexes?**
+- Enable efficient queries like "All attendance for student, sorted by date"
+- Firestore automatically suggests needed indexes
+- Avoid full collection scans for reports
+
+### Scalability & Performance
+
+**Storage Estimate (1 center, 500 students, 1 year):**
+- Attendance records: ~270,000 docs = 216 MB
+- Progress records: ~15,000 docs = 22.5 MB
+- Total: ~246 MB (well within free tier of 1 GB/month)
+
+**Read/Write Optimization:**
+- Attendance queries indexed by (studentId, date)
+- Progress queries indexed by (studentId, courseId)
+- Center-level reports use centerId index
+- Subcollections prevent loading unnecessary parent data
+
+**Handles Scaling To:**
+- 10+ coaching centers
+- 5,000+ total students
+- 100,000+ monthly attendance records
+- 50,000+ academic assessments per semester
+
+### For Detailed Documentation
+
+See comprehensive documentation:
+- **[FIRESTORE_SCHEMA.md](FIRESTORE_SCHEMA.md)** - Complete schema with all fields, types, and examples
+- **[FIRESTORE_SCHEMA_DIAGRAMS.md](FIRESTORE_SCHEMA_DIAGRAMS.md)** - Visual diagrams, data flow, and relationships
+
+These documents include:
+- ✅ Full field specifications and data types
+- ✅ Sample JSON documents for every collection
+- ✅ Mermaid diagrams showing relationships
+- ✅ Indexing strategy and query patterns
+- ✅ Security rules framework
+- ✅ Future extension paths (payments, chat, submissions)
+
+### Next Steps
+
+1. ✅ Schema designed (you are here)
+2. 🔧 **Security Rules** - Configure Firestore access control
+3. 📋 **CRUD Services** - Create Dart classes for database operations
+4. 🏗️ **Data Models** - Implement typed models for type safety
+5. 🎨 **UI Integration** - Connect widgets to Firestore via StreamBuilder
+6. 📊 **Real-time Listeners** - Setup live updates for attendance/grades
+7. 🧪 **Testing** - Unit and integration tests
+
+---
+
 
 
 
