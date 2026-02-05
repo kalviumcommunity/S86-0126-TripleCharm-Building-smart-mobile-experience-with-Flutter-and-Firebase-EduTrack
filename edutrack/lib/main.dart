@@ -20,6 +20,7 @@ import 'screens/auth_screen.dart';
 import 'screens/dashboard_screen.dart';
 import 'screens/realtime_sync.dart';
 import 'screens/firestore_queries_demo.dart';
+import 'screens/firebase_storage_upload_demo.dart';
 import 'screens/demo_launcher_screen.dart';
 
 void main() async {
@@ -102,6 +103,7 @@ class MyApp extends StatelessWidget {
         '/animations/page': (context) => const PageTransitionDemo(),
         '/realtime': (context) => const RealTimeSyncScreen(),
         '/firestore-queries': (context) => const FirestoreQueriesDemo(),
+        '/firebase-storage-upload': (context) => const FirebaseStorageUploadDemo(),
         '/demos': (context) => const DemoLauncherScreen(),
       },
     );

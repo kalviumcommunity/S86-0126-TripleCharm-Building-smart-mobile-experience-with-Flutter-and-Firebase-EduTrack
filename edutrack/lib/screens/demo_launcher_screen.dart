@@ -60,16 +60,12 @@ class DemoLauncherScreen extends StatelessWidget {
             ),
             _buildDemoCard(
               context,
-              title: 'Coming Soon',
-              subtitle: 'More demos...',
-              icon: Icons.construction,
-              color: Colors.grey,
+              title: 'Firebase Storage',
+              subtitle: 'Media Uploads & Management',
+              icon: Icons.cloud_upload,
+              color: Colors.teal,
               onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('More demos coming soon!'),
-                  ),
-                );
+                Navigator.pushNamed(context, '/firebase-storage-upload');
               },
             ),
           ],
