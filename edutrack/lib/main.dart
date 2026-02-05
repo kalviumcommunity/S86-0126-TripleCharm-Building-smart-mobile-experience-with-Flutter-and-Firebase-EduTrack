@@ -19,6 +19,8 @@ import 'screens/state_management_demo.dart';
 import 'screens/auth_screen.dart';
 import 'screens/dashboard_screen.dart';
 import 'screens/realtime_sync.dart';
+import 'screens/firestore_queries_demo.dart';
+import 'screens/demo_launcher_screen.dart';
 
 void main() async {
   // Ensure Flutter bindings are initialized
@@ -99,6 +101,8 @@ class MyApp extends StatelessWidget {
         '/animations/rotate': (context) => const RotateLogoDemo(),
         '/animations/page': (context) => const PageTransitionDemo(),
         '/realtime': (context) => const RealTimeSyncScreen(),
+        '/firestore-queries': (context) => const FirestoreQueriesDemo(),
+        '/demos': (context) => const DemoLauncherScreen(),
       },
     );
   }
