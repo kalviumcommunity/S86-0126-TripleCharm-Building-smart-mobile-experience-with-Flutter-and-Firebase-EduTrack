@@ -45,6 +45,11 @@ dependencies:
   
   # Media handling
   image_picker: ^1.0.0
+  # Google Maps for Flutter
+  google_maps_flutter: ^2.3.0
+  # Location + permission handling
+  geolocator: ^9.0.2
+  permission_handler: ^10.4.0
 
 dev_dependencies:
   flutter_test:
