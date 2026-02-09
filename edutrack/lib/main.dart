@@ -23,6 +23,7 @@ import 'screens/realtime_sync.dart';
 import 'screens/firestore_queries_demo.dart';
 import 'screens/firebase_storage_upload_demo.dart';
 import 'screens/demo_launcher_screen.dart';
+import 'screens/map_screen.dart';
 
 void main() async {
   // Ensure Flutter bindings are initialized
@@ -123,6 +124,7 @@ class MyApp extends StatelessWidget {
         '/firestore-queries': (context) => const FirestoreQueriesDemo(),
         '/firebase-storage-upload': (context) => const FirebaseStorageUploadDemo(),
         '/demos': (context) => const DemoLauncherScreen(),
+        '/map': (context) => const MapScreen(),
       },
     );
   }

@@ -192,6 +192,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
         foregroundColor: Colors.white,
         actions: [
           IconButton(
+            icon: const Icon(Icons.map_outlined),
+            onPressed: () => Navigator.pushNamed(context, '/map'),
+            tooltip: 'Open Map',
+          ),
+          IconButton(
             icon: const Icon(Icons.logout),
             onPressed: _handleLogout,
             tooltip: 'Logout',
