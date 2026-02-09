@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'services/notification_service.dart';
 import 'screens/welcome_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/stateless_stateful_demo.dart';
@@ -43,6 +44,23 @@ void main() async {
     print('✅ Firebase initialized successfully!');
   } catch (e) {
     print('❌ Firebase initialization error: $e');
+  }
+
+  // Initialize Firebase Cloud Messaging (FCM)
+  try {
+    final notificationService = NotificationService();
+    await notificationService.initialize();
+    await notificationService.checkInitialMessage();
+    
+    // Get and display the device token
+    String? token = await notificationService.getDeviceToken();
+    if (token != null) {
+      print('✅ Device FCM Token obtained: $token');
+    }
+    
+    print('✅ Push Notifications initialized successfully!');
+  } catch (e) {
+    print('❌ Notification Service initialization error: $e');
   }
   
   runApp(const MyApp());
