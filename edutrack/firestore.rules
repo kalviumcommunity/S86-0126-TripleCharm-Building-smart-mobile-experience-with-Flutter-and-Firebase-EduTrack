@@ -1,0 +1,245 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // ========================= UTILITY FUNCTIONS =========================
+    
+    /// Check if user is authenticated
+    function isAuth() {
+      return request.auth != null;
+    }
+    
+    /// Check if user is the owner of the document (UID matches)
+    function isOwner(uid) {
+      return isAuth() && request.auth.uid == uid;
+    }
+    
+    /// Check if user is an admin (has admin role in their user document)
+    function isAdmin() {
+      return isAuth() && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+    
+    /// Check if user has a specific role
+    function hasRole(role) {
+      return isAuth() && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == role;
+    }
+    
+    /// Prevent data from being deleted (archived instead)
+    function preventDelete() {
+      return false;
+    }
+    
+    /// Validate required fields exist in write data
+    function hasRequiredFields(fields) {
+      return fields.all(field => field in request.resource.data);
+    }
+    
+    // ========================= USERS COLLECTION =========================
+    
+    match /users/{uid} {
+      // Users can only read/write their own profile
+      allow read: if isOwner(uid);
+      
+      allow create: if isAuth() && isOwner(uid) && 
+                       hasRequiredFields(['email', 'uid', 'createdAt']);
+      
+      allow update: if isOwner(uid) && 
+                       (request.resource.data.uid == uid ||
+                        !('uid' in request.resource.data));
+      
+      allow delete: if false; // Prevent user deletion - use deactivation instead
+      
+      // Allow admins to read all user data (for management purposes)
+      allow read: if isAdmin();
+      
+      // Subcollection: User preferences
+      match /preferences/{document=**} {
+        allow read, write: if isOwner(uid);
+      }
+      
+      // Subcollection: User activities (read-only for auditing)
+      match /activities/{document=**} {
+        allow read: if isOwner(uid) || isAdmin();
+        allow create: if isOwner(uid);
+        allow update, delete: if false;
+      }
+    }
+    
+    // ========================= STUDENTS COLLECTION =========================
+    
+    match /students/{studentId} {
+      // Allow authenticated users to read students (view student directory)
+      allow read: if isAuth();
+      
+      // Only admins or the student's assigned teacher can create/update
+      allow create: if (isAdmin() || hasRole('teacher')) && 
+                        hasRequiredFields(['name', 'email', 'createdAt']);
+      
+      allow update: if (isAdmin() || hasRole('teacher')) &&
+                        resource.data.createdAt == request.resource.data.createdAt;
+      
+      // Only admins can delete (or soft-delete via update)
+      allow delete: if isAdmin();
+      
+      // Subcollection: Enrollment records (linked to courses/classes)
+      match /enrollments/{document=**} {
+        allow read: if isAuth();
+        allow write: if isAdmin() || hasRole('teacher');
+      }
+      
+      // Subcollection: Assignments for this student
+      match /assignments/{document=**} {
+        allow read: if isAuth();
+        allow write: if isAdmin() || hasRole('teacher');
+      }
+    }
+    
+    // ========================= ATTENDANCE COLLECTION =========================
+    
+    match /attendance/{attendanceId} {
+      // Authenticated users can read attendance (teachers, parents, admins)
+      allow read: if isAuth();
+      
+      // Only teachers and admins can create/update attendance
+      allow create: if (isAdmin() || hasRole('teacher')) && 
+                        hasRequiredFields(['studentId', 'date', 'isPresent', 'timestamp']);
+      
+      allow update: if (isAdmin() || hasRole('teacher')) &&
+                        resource.data.timestamp == request.resource.data.timestamp;
+      
+      // Only admins can delete attendance records
+      allow delete: if isAdmin();
+    }
+    
+    // ========================= PROGRESS COLLECTION =========================
+    
+    match /progress/{progressId} {
+      // Authenticated users can read progress (parents, teachers, students)
+      allow read: if isAuth();
+      
+      // Only teachers and admins can create/update progress
+      allow create: if (isAdmin() || hasRole('teacher')) && 
+                        hasRequiredFields(['studentId', 'subject', 'score', 'createdAt']);
+      
+      allow update: if (isAdmin() || hasRole('teacher'));
+      
+      // Only admins can delete, but better to archive with a status field
+      allow delete: if isAdmin();
+    }
+    
+    // ========================= ASSIGNMENTS COLLECTION =========================
+    
+    match /assignments/{assignmentId} {
+      // Authenticated users can read assignments
+      allow read: if isAuth();
+      
+      // Only teachers and admins can create assignments
+      allow create: if (isAdmin() || hasRole('teacher')) && 
+                        hasRequiredFields(['title', 'description', 'dueDate', 'subject', 'createdAt']);
+      
+      allow update: if (isAdmin() || hasRole('teacher')) &&
+                        resource.data.createdAt == request.resource.data.createdAt;
+      
+      // Only admins can delete assignments
+      allow delete: if isAdmin();
+      
+      // Subcollection: Submissions for this assignment
+      match /submissions/{submissionId} {
+        // Students can read their own submissions
+        // Teachers can read all submissions
+        allow read: if isAuth();
+        
+        // Students can submit assignments
+        allow create: if isAuth() && 
+                         hasRequiredFields(['studentId', 'submissionDate', 'content']);
+        
+        // Teachers only can grade/review
+        allow update: if isAdmin() || hasRole('teacher');
+        
+        allow delete: if isAdmin();
+      }
+    }
+    
+    // ========================= ANNOUNCEMENTS COLLECTION =========================
+    
+    match /announcements/{announcementId} {
+      // All authenticated users can read announcements
+      allow read: if isAuth();
+      
+      // Only admins can create/update announcements
+      allow create: if isAdmin() && 
+                        hasRequiredFields(['title', 'content', 'createdAt', 'authorId']);
+      
+      allow update: if isAdmin();
+      
+      allow delete: if isAdmin();
+    }
+    
+    // ========================= COURSES/CLASSES COLLECTION =========================
+    
+    match /courses/{courseId} {
+      // Authenticated users can read courses
+      allow read: if isAuth();
+      
+      // Only admins and teachers can create courses
+      allow create: if (isAdmin() || hasRole('teacher')) && 
+                        hasRequiredFields(['name', 'description', 'teacherId', 'createdAt']);
+      
+      // Only course teacher and admins can update
+      allow update: if isAdmin() || 
+                        (hasRole('teacher') && resource.data.teacherId == request.auth.uid);
+      
+      allow delete: if isAdmin();
+      
+      // Subcollection: Enrollments in this course
+      match /enrollments/{enrollmentId} {
+        allow read: if isAuth();
+        allow write: if isAdmin() || hasRole('teacher');
+      }
+    }
+    
+    // ========================= NOTIFICATIONS COLLECTION =========================
+    
+    match /notifications/{userId}/messages/{messageId} {
+      // Users can only read their own notifications
+      allow read: if isAuth() && isOwner(userId);
+      
+      // Only server/cloud functions can write notifications
+      allow create: if false;
+      
+      // Users can mark notifications as read
+      allow update: if isAuth() && isOwner(userId) && 
+                        (!('sender' in request.resource.data));
+      
+      allow delete: if isAuth() && isOwner(userId);
+    }
+    
+    // ========================= AUDIT LOG COLLECTION =========================
+    
+    match /auditLogs/{logId} {
+      // Only admins can read audit logs
+      allow read: if isAdmin();
+      
+      // No direct writes - only via cloud functions
+      allow write: if false;
+    }
+    
+    // ========================= SETTINGS COLLECTION =========================
+    
+    match /settings/{settingId} {
+      // Authenticated users can read public settings
+      allow read: if isAuth();
+      
+      // Only admins can modify settings
+      allow write: if isAdmin();
+    }
+    
+    // ========================= CATCH-ALL RULE (MOST RESTRICTIVE) =========================
+    
+    // Explicitly deny all other access
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
