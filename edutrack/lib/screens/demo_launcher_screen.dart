@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'firestore_queries_demo.dart';
+import 'map_screen.dart';
+import 'location_demo_screen.dart';
 
 /// Demo Launcher Screen
 /// 
@@ -12,7 +14,7 @@ class DemoLauncherScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Firebase Demos'),
+        title: const Text('Firebase & Location Demos'),
         backgroundColor: Colors.deepPurple,
         foregroundColor: Colors.white,
       ),
@@ -66,6 +68,36 @@ class DemoLauncherScreen extends StatelessWidget {
               color: Colors.teal,
               onTap: () {
                 Navigator.pushNamed(context, '/firebase-storage-upload');
+              },
+            ),
+            _buildDemoCard(
+              context,
+              title: 'Map & Location',
+              subtitle: 'GPS Tracking & Markers',
+              icon: Icons.location_on,
+              color: Colors.red,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const MapScreen(),
+                  ),
+                );
+              },
+            ),
+            _buildDemoCard(
+              context,
+              title: 'Location Demo',
+              subtitle: 'Position & Distance Calc',
+              icon: Icons.my_location,
+              color: Colors.green,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const LocationDemoScreen(),
+                  ),
+                );
               },
             ),
           ],
