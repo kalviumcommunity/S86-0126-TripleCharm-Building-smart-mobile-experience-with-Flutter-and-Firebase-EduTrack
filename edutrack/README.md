@@ -14,6 +14,7 @@ This project demonstrates Firebase Cloud Functions for serverless backend logic.
   - `onUserDeleted` - Cleans up user data on deletion
 
 ### ✅ Flutter Integration
+
 - Added `cloud_functions: ^5.0.0` to `pubspec.yaml`
 - Created `CloudFunctionsService` class (`lib/services/cloud_functions_service.dart`)
 - Built demo screen (`lib/screens/cloud_functions_demo.dart`)
