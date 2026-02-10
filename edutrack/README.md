@@ -4,6 +4,10 @@
 
 **All Sprint #2 conceptual deliverables have been successfully completed!**
 
+## 📌 PR Note
+
+This README was updated to include a minor documentation change for the PR workflow.
+
 | Task | Status | Details |
 |------|--------|---------|
 | 📝 Creating and Using Stateless and Stateful Widgets | ✅ **COMPLETED** | [Jump to section](#-task-1-creating-and-using-stateless-and-stateful-widgets---completed) |
