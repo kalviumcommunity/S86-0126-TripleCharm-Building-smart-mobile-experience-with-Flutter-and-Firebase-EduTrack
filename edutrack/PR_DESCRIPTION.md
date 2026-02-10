@@ -1,59 +1,155 @@
-# PR: [Sprint-2] Reusable Custom Widgets – Triple Charm
+# Using Provider or Riverpod for Scalable State Management
 
-## Summary
+As apps grow, managing state across multiple screens becomes challenging. Passing data through constructors or relying on `setState` alone quickly becomes unmanageable. To build scalable Flutter applications, we use state management solutions such as Provider or Riverpod. These allow global state to be shared, updated, listened to, and consumed from anywhere in the app without tight coupling or messy code.
 
-This PR introduces a small set of reusable UI components and a responsive demo screen to demonstrate adaptive layouts using `MediaQuery` and `LayoutBuilder`.
+This lesson will guide you through setting up Provider or Riverpod, creating reactive state objects, updating shared state, and using this state across multiple screens.
 
-Files added:
+## 1. Why Scalable State Management Matters
 
-- `lib/widgets/custom_button.dart` — reusable Elevated/Outlined button with optional icon
-- `lib/widgets/info_card.dart` — small Card+ListTile component for consistent info display
-- `lib/widgets/like_button.dart` — simple stateful like (favorite) icon
-- `lib/widgets/README_WIDGETS.md` — usage examples and reflection
-- `lib/screens/responsive_demo.dart` — demo showing `MediaQuery` + `LayoutBuilder`
+- Eliminates prop drilling across screens.
+- Makes UI reactive and automatically updates on data changes.
+- Helps structure clean architecture with separation of UI, state, and logic.
+- Essential for larger apps with authentication, shopping carts, settings, dashboards, and more.
+- Reduces boilerplate and improves testability.
 
-Files updated:
+## Option A: Using Provider (Most Common Beginner Choice)
 
-- `lib/screens/home_screen.dart` — replaced several buttons with `CustomButton`
-- `lib/screens/second_screen.dart` — replaced Card with `InfoCard`, added `LikeButton`, replaced buttons with `CustomButton`
-- `README.md` — documented new widgets and responsive demo
+### 2. Add Dependency
 
-## How to run
-
-```bash
-flutter pub get
-flutter run
+```yaml
+dependencies:
+	provider: ^latest
 ```
 
-Navigate to Home -> View Widget Demo or Responsive Demo (route `/responsive` or `/demo` depending on app routing).
+### 3. Create a State Class
 
-## Screenshots (placeholders)
+```dart
+class CounterState with ChangeNotifier {
+	int count = 0;
 
-- Phone view: `screenshots/responsive-phone.png`  
-- Tablet view: `screenshots/responsive-tablet.png`  
-- Home screen showing reused `CustomButton`: `screenshots/home-custombutton.png`  
-- Second screen showing `InfoCard` & `LikeButton`: `screenshots/second-infocard.png`
+	void increment() {
+		count++;
+		notifyListeners();
+	}
+}
+```
 
-Please add the actual screenshot files at `screenshots/` and update this PR accordingly.
+### 4. Register Provider at App Root
 
-## Reflection
+```dart
+void main() {
+	runApp(
+		ChangeNotifierProvider(
+			create: (_) => CounterState(),
+			child: const MyApp(),
+		),
+	);
+}
+```
 
-- Reusable widgets improve development efficiency by reducing duplication and centralizing style and behavior.
-- Challenges: designing small, focused APIs (constructor params) that are flexible without being overly complex.
-- Team application: place common UI patterns in `lib/widgets/` and enforce through code reviews; adopt design tokens for colors and sizes.
+### 5. Reading and Updating State in UI
 
-## Checklist
+Reading:
 
-- [x] Added reusable widgets and demo screen
-- [x] Updated screens to reuse components
-- [x] Updated README with usage notes
-- [ ] Added screenshots (please attach)
-- [ ] Recorded 1–2 minute demo video and linked it here: (video link)
+```dart
+final counter = context.watch<CounterState>();
+Text("Count: ${counter.count}");
+```
 
-## Commit message
+Updating:
 
-`feat: created and reused custom widgets for modular UI design`
+```dart
+context.read<CounterState>().increment();
+```
 
----
+This triggers UI rebuilds automatically.
 
-If you want, I can try to create the GitHub PR now using the `gh` CLI. If `gh` is not installed or you prefer not to authorize it here, please create the PR manually and paste this file as the PR body.
+## Option B: Using Riverpod (Advanced, More Scalable Choice)
+
+### 6. Add Dependency
+
+```yaml
+dependencies:
+	flutter_riverpod: ^latest
+```
+
+### 7. Create a StateProvider
+
+```dart
+final counterProvider = StateProvider<int>((ref) => 0);
+```
+
+### 8. Wrap App With ProviderScope
+
+```dart
+void main() {
+	runApp(const ProviderScope(child: MyApp()));
+}
+```
+
+### 9. Reading and Updating State in UI
+
+Read:
+
+```dart
+final count = ref.watch(counterProvider);
+Text("Count: $count");
+```
+
+Update:
+
+```dart
+ref.read(counterProvider.notifier).state++;
+```
+
+Riverpod ensures immutability and predictable updates.
+
+## 10. Multi-Screen Shared State
+
+Example: A favorites list used across multiple screens.
+
+Provider example:
+
+```dart
+class Favorites extends ChangeNotifier {
+	final List<String> items = [];
+
+	void addItem(String item) {
+		items.add(item);
+		notifyListeners();
+	}
+}
+```
+
+Used in screen A:
+
+```dart
+context.read<Favorites>().addItem("Book");
+```
+
+Read in screen B:
+
+```dart
+ListView(
+	children: context.watch<Favorites>().items.map(Text.new).toList(),
+);
+```
+
+Your UI stays in sync everywhere.
+
+## 11. Best Practices
+
+- Never store heavy objects like controllers or contexts in providers.
+- Keep business logic in providers, UI logic in widgets.
+- Prefer Riverpod for large apps; Provider is better for small or medium apps.
+- Break complex state into multiple providers.
+- Use immutable patterns and avoid deep widget rebuilding.
+
+## 12. Common Issues and Fixes
+
+| Issue | Cause | Fix |
+| --- | --- | --- |
+| UI not updating | Forgot `notifyListeners()` or used wrong listener | Use `watch()` and ensure `notifyListeners()` is called |
+| Multiple instances of provider | Provider not declared at root | Move provider to highest possible scope |
+| Riverpod read or update errors | Wrong read or watch syntax | Use `ref.watch`, `ref.read`, `provider.notifier` correctly |
+| Performance drops | Too many rebuilds | Selectively watch only needed values |
