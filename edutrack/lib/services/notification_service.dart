@@ -58,7 +58,7 @@ class NotificationService {
 
       if (settings.authorizationStatus == AuthorizationStatus.denied) {
         print('⚠️  Notifications disabled by user');
-      } else if (settings.authorizationStatus == AuthorizationStatus.granted) {
+      } else if (settings.authorizationStatus == AuthorizationStatus.authorized) {
         print('✅ Notifications enabled');
       } else if (settings.authorizationStatus ==
           AuthorizationStatus.provisional) {
