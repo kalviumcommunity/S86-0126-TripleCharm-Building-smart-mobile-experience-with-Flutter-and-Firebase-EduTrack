@@ -31,7 +31,7 @@ class PageTransitionDemo extends StatelessWidget {
 }
 
 class _SecondPage extends StatelessWidget {
-  const _SecondPage({super.key});
+  const _SecondPage();
 
   @override
   Widget build(BuildContext context) {

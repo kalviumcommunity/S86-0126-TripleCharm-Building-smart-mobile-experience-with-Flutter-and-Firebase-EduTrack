@@ -6,7 +6,7 @@ import '../services/firestore_service.dart';
 
 /// Demo screen for testing Firestore Security Rules and Permissions
 class FirestoreSecurityDemoScreen extends StatefulWidget {
-  const FirestoreSecurityDemoScreen({Key? key}) : super(key: key);
+  const FirestoreSecurityDemoScreen({super.key});
 
   @override
   State<FirestoreSecurityDemoScreen> createState() =>

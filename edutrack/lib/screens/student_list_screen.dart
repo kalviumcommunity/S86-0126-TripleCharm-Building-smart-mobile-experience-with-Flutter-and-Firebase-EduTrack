@@ -8,9 +8,9 @@ class StudentListScreen extends StatefulWidget {
   final String centerId;
 
   const StudentListScreen({
-    Key? key,
+    super.key,
     required this.centerId,
-  }) : super(key: key);
+  });
 
   @override
   State<StudentListScreen> createState() => _StudentListScreenState();
@@ -224,9 +224,9 @@ class StudentDetailScreen extends StatefulWidget {
   final String studentId;
 
   const StudentDetailScreen({
-    Key? key,
+    super.key,
     required this.studentId,
-  }) : super(key: key);
+  });
 
   @override
   State<StudentDetailScreen> createState() => _StudentDetailScreenState();

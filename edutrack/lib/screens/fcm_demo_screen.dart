@@ -4,7 +4,7 @@ import '../services/notification_service.dart';
 
 /// Demo screen showing how to use Firebase Cloud Messaging (FCM)
 class FCMDemoScreen extends StatefulWidget {
-  const FCMDemoScreen({Key? key}) : super(key: key);
+  const FCMDemoScreen({super.key});
 
   @override
   State<FCMDemoScreen> createState() => _FCMDemoScreenState();

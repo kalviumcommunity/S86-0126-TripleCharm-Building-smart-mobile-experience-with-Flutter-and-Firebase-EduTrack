@@ -6,7 +6,7 @@ import '../services/cloud_functions_service.dart';
 /// 1. Callable Cloud Functions (sayHello, logUserActivity)
 /// 2. How to handle responses and errors
 class CloudFunctionsDemo extends StatefulWidget {
-  const CloudFunctionsDemo({Key? key}) : super(key: key);
+  const CloudFunctionsDemo({super.key});
 
   @override
   State<CloudFunctionsDemo> createState() => _CloudFunctionsDemoState();

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'services/notification_service.dart';
 import 'screens/welcome_screen.dart';
 import 'screens/login_screen.dart';
@@ -14,9 +15,6 @@ import 'screens/second_screen.dart';
 import 'screens/responsive_layout.dart';
 import 'screens/responsive_demo.dart';
 import 'screens/asset_demo.dart';
-import 'screens/scrollable_views.dart';
-import 'screens/user_input_form.dart';
-import 'screens/state_management_demo.dart';
 import 'screens/auth_screen.dart';
 import 'screens/dashboard_screen.dart';
 import 'screens/realtime_sync.dart';
@@ -24,6 +22,9 @@ import 'screens/firestore_queries_demo.dart';
 import 'screens/firebase_storage_upload_demo.dart';
 import 'screens/demo_launcher_screen.dart';
 import 'screens/map_screen.dart';
+import 'screens/study_items_crud_screen.dart';
+import 'screens/create_edit_item_screen.dart';
+import 'screens/items_map_view.dart';
 
 void main() async {
   // Ensure Flutter bindings are initialized
@@ -64,7 +65,7 @@ void main() async {
     print('❌ Notification Service initialization error: $e');
   }
   
-  runApp(const MyApp());
+  runApp(const ProviderScope(child: MyApp()));
 }
 
 class MyApp extends StatelessWidget {
@@ -125,6 +126,9 @@ class MyApp extends StatelessWidget {
         '/firebase-storage-upload': (context) => const FirebaseStorageUploadDemo(),
         '/demos': (context) => const DemoLauncherScreen(),
         '/map': (context) => const MapScreen(),
+        '/study-items': (context) => const StudyItemsCrudScreen(),
+        '/study-items/create': (context) => const CreateEditItemScreen(isEdit: false),
+        '/study-items/map': (context) => const ItemsMapView(),
       },
     );
   }

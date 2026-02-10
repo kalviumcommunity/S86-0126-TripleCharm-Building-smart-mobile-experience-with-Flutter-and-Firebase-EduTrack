@@ -180,7 +180,7 @@ class _FirebaseStatusScreenState extends State<FirebaseStatusScreen> {
                       padding: const EdgeInsets.only(bottom: 16),
                       child: _buildDetailRow(entry.key, entry.value),
                     );
-                  }).toList(),
+                  }),
                 ],
               ),
             ),

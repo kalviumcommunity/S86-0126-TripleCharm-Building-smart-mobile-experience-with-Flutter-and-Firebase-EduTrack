@@ -13,7 +13,7 @@ import '../services/storage_service.dart';
 /// - Track upload progress
 /// - Delete files
 class FirebaseStorageUploadDemo extends StatefulWidget {
-  const FirebaseStorageUploadDemo({Key? key}) : super(key: key);
+  const FirebaseStorageUploadDemo({super.key});
 
   @override
   State<FirebaseStorageUploadDemo> createState() =>
@@ -476,7 +476,7 @@ class _FirebaseStorageUploadDemoState extends State<FirebaseStorageUploadDemo> {
         ),
         const SizedBox(height: 8),
         DropdownButtonFormField<String>(
-          value: _selectedFolder,
+          initialValue: _selectedFolder,
           decoration: InputDecoration(
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),

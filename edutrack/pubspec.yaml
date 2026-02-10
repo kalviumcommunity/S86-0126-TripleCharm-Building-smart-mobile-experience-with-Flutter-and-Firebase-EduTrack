@@ -50,6 +50,13 @@ dependencies:
   # Location + permission handling
   geolocator: ^9.0.2
   permission_handler: ^10.4.0
+  
+  # State Management
+  riverpod: ^2.4.0
+  flutter_riverpod: ^2.4.0
+  
+  # Additional utilities
+  uuid: ^4.0.0
 
 dev_dependencies:
   flutter_test:

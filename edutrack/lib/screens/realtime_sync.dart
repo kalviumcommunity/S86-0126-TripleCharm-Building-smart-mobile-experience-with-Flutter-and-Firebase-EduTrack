@@ -5,7 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class RealTimeSyncScreen extends StatefulWidget {
-  const RealTimeSyncScreen({Key? key}) : super(key: key);
+  const RealTimeSyncScreen({super.key});
 
   @override
   State<RealTimeSyncScreen> createState() => _RealTimeSyncScreenState();
@@ -115,8 +115,8 @@ class _RealTimeSyncScreenState extends State<RealTimeSyncScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _addTestMessage,
-        child: const Icon(Icons.add),
         tooltip: 'Add test message',
+        child: const Icon(Icons.add),
       ),
     );
   }

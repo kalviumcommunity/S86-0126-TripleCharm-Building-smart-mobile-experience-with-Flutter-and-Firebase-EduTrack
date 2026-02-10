@@ -29,7 +29,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Map<String, dynamic>? _userData;
   List<Map<String, dynamic>> _students = [];
   bool _isLoading = true;
-  bool _isLoggingOut = false;
+  final bool _isLoggingOut = false;
 
   @override
   void initState() {

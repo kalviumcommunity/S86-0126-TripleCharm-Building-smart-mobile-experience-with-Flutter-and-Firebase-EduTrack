@@ -9,9 +9,9 @@ class AttendanceFeedScreen extends StatefulWidget {
   final String centerId;
 
   const AttendanceFeedScreen({
-    Key? key,
+    super.key,
     required this.centerId,
-  }) : super(key: key);
+  });
 
   @override
   State<AttendanceFeedScreen> createState() => _AttendanceFeedScreenState();
@@ -261,9 +261,9 @@ class AttendanceStatsScreen extends StatefulWidget {
   final String studentId;
 
   const AttendanceStatsScreen({
-    Key? key,
+    super.key,
     required this.studentId,
-  }) : super(key: key);
+  });
 
   @override
   State<AttendanceStatsScreen> createState() => _AttendanceStatsScreenState();
@@ -417,7 +417,7 @@ class _AttendanceStatsScreenState extends State<AttendanceStatsScreen> {
                         ],
                       ),
                     );
-                  }).toList(),
+                  }),
                 ],
               ),
             ),

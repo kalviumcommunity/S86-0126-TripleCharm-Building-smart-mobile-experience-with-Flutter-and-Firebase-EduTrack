@@ -10,7 +10,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 /// - Real-time updates with StreamBuilder
 /// - Various filter types (equality, comparison, array)
 class FirestoreQueriesDemo extends StatefulWidget {
-  const FirestoreQueriesDemo({Key? key}) : super(key: key);
+  const FirestoreQueriesDemo({super.key});
 
   @override
   State<FirestoreQueriesDemo> createState() => _FirestoreQueriesDemoState();
@@ -78,7 +78,7 @@ class _FirestoreQueriesDemoState extends State<FirestoreQueriesDemo> {
           
           // Query type selector
           DropdownButtonFormField<String>(
-            value: _selectedQuery,
+            initialValue: _selectedQuery,
             decoration: const InputDecoration(
               labelText: 'Select Query Type',
               border: OutlineInputBorder(),
@@ -113,13 +113,13 @@ class _FirestoreQueriesDemoState extends State<FirestoreQueriesDemo> {
                       _isDescending = value;
                     });
                   },
-                  activeColor: Colors.deepPurple,
+                  activeThumbColor: Colors.deepPurple,
                 ),
               ),
               const SizedBox(width: 8),
               Expanded(
                 child: DropdownButtonFormField<int>(
-                  value: _limitCount,
+                  initialValue: _limitCount,
                   decoration: const InputDecoration(
                     labelText: 'Limit',
                     border: OutlineInputBorder(),

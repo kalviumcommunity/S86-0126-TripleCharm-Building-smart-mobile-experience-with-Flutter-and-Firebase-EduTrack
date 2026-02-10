@@ -7,7 +7,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 /// Copy and adapt this pattern to your needs.
 
 class SimpleFirestoreQueryExample extends StatelessWidget {
-  const SimpleFirestoreQueryExample({Key? key}) : super(key: key);
+  const SimpleFirestoreQueryExample({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -290,7 +290,7 @@ class FirestoreQueryPatterns {
 
 /// A widget that displays query syntax reference
 class QueryReferenceCard extends StatelessWidget {
-  const QueryReferenceCard({Key? key}) : super(key: key);
+  const QueryReferenceCard({super.key});
 
   @override
   Widget build(BuildContext context) {

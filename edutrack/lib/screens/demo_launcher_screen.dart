@@ -6,7 +6,7 @@ import 'firestore_queries_demo.dart';
 /// A simple screen that provides quick access to various
 /// Firestore and Firebase demos including the Queries Demo
 class DemoLauncherScreen extends StatelessWidget {
-  const DemoLauncherScreen({Key? key}) : super(key: key);
+  const DemoLauncherScreen({super.key});
 
   @override
   Widget build(BuildContext context) {

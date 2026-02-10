@@ -237,9 +237,9 @@ class ImagePickerButton extends StatelessWidget {
   final Function(XFile) onImageSelected;
   
   const ImagePickerButton({
-    Key? key,
+    super.key,
     required this.onImageSelected,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -299,11 +299,11 @@ class UploadProgressWidget extends StatefulWidget {
   final Function(String) onUploadComplete;
   
   const UploadProgressWidget({
-    Key? key,
+    super.key,
     required this.imageFile,
     required this.folder,
     required this.onUploadComplete,
-  }) : super(key: key);
+  });
 
   @override
   State<UploadProgressWidget> createState() => _UploadProgressWidgetState();
@@ -368,11 +368,11 @@ class CachedImageDisplay extends StatelessWidget {
   final double height;
   
   const CachedImageDisplay({
-    Key? key,
+    super.key,
     required this.downloadURL,
     this.width = 200,
     this.height = 200,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -409,9 +409,9 @@ class StorageFileListWidget extends StatefulWidget {
   final String folderPath;
   
   const StorageFileListWidget({
-    Key? key,
+    super.key,
     required this.folderPath,
-  }) : super(key: key);
+  });
 
   @override
   State<StorageFileListWidget> createState() => _StorageFileListWidgetState();
@@ -482,9 +482,9 @@ class ProfilePictureUpload extends StatefulWidget {
   final Function(String) onUploadComplete;
   
   const ProfilePictureUpload({
-    Key? key,
+    super.key,
     required this.onUploadComplete,
-  }) : super(key: key);
+  });
 
   @override
   State<ProfilePictureUpload> createState() => _ProfilePictureUploadState();

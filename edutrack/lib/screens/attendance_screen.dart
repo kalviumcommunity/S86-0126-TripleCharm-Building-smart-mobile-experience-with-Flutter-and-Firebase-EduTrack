@@ -151,7 +151,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                 const SizedBox(height: 12),
                 // Class Selector
                 DropdownButtonFormField<String>(
-                  value: _selectedClass,
+                  initialValue: _selectedClass,
                   decoration: InputDecoration(
                     prefixIcon: const Icon(Icons.class_, color: Color(0xFF6C63FF)),
                     filled: true,

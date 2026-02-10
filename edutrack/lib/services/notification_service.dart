@@ -1,5 +1,4 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter/material.dart';
 
 /// Firebase Cloud Messaging (FCM) Service
 /// Handles push notifications in foreground, background, and terminated states

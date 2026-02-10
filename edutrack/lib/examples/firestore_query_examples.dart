@@ -323,7 +323,7 @@ class FirestoreQueryExamples {
 
 /// Widget showing StreamBuilder with query
 class StreamBuilderQueryExample extends StatelessWidget {
-  const StreamBuilderQueryExample({Key? key}) : super(key: key);
+  const StreamBuilderQueryExample({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -375,7 +375,7 @@ class StreamBuilderQueryExample extends StatelessWidget {
 
 /// Widget showing FutureBuilder with query
 class FutureBuilderQueryExample extends StatelessWidget {
-  const FutureBuilderQueryExample({Key? key}) : super(key: key);
+  const FutureBuilderQueryExample({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -440,7 +440,7 @@ class FutureBuilderQueryExample extends StatelessWidget {
 
 /// Widget showing pagination example
 class PaginationExample extends StatefulWidget {
-  const PaginationExample({Key? key}) : super(key: key);
+  const PaginationExample({super.key});
 
   @override
   State<PaginationExample> createState() => _PaginationExampleState();

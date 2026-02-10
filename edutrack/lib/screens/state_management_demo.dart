@@ -22,7 +22,7 @@ class _StateManagementDemoState extends State<StateManagementDemo> {
   int _counter = 0;
   int _history = 0;
   bool _isMaxReached = false;
-  List<String> _actionLog = [];
+  final List<String> _actionLog = [];
 
   // Constants for thresholds
   static const int _MAX_COUNT = 10;
