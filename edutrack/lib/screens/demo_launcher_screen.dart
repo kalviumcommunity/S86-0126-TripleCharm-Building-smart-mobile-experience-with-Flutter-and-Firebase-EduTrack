@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'firestore_queries_demo.dart';
 import 'map_screen.dart';
 import 'location_demo_screen.dart';
+import 'crud_demo_screen.dart';
 
 /// Demo Launcher Screen
 /// 
@@ -96,6 +97,21 @@ class DemoLauncherScreen extends StatelessWidget {
                   context,
                   MaterialPageRoute(
                     builder: (context) => const LocationDemoScreen(),
+                  ),
+                );
+              },
+            ),
+            _buildDemoCard(
+              context,
+              title: 'Complete CRUD',
+              subtitle: 'Create, Read, Update, Delete',
+              icon: Icons.app_registration,
+              color: Colors.teal,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const CrudDemoScreen(),
                   ),
                 );
               },

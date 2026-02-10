@@ -85,7 +85,7 @@ class LocationService {
       locationSettings: AndroidSettings(
         accuracy: accuracy,
         distanceFilter: distanceFilter,
-        intervalDuration: intervalDuration,
+        intervalDuration: Duration(milliseconds: intervalDuration),
         forceLocationManager: false,
       ),
     );

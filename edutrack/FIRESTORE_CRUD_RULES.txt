@@ -1,0 +1,286 @@
+// Firebase Firestore Security Rules for CRUD Operations
+// 
+// How to apply these rules:
+// 1. Go to Firebase Console → Select your project
+// 2. Go to Firestore Database → Rules tab
+// 3. Replace all content with this file's rules
+// 4. Click "Publish"
+//
+// IMPORTANT: Test in "Simulator" before publishing to production!
+
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // ==================== USER DATA ====================
+    // Each user's items are private - only they can access them
+    
+    match /users/{uid}/items/{itemId} {
+      // User can read only their own items
+      allow read: if request.auth.uid == uid;
+      
+      // User can create new items in their collection
+      allow create: if request.auth.uid == uid
+        && request.resource.data.keys().hasAll(['title', 'createdAt'])
+        && request.resource.data.title is string
+        && request.resource.data.title.size() > 0
+        && request.resource.data.title.size() <= 100;
+      
+      // User can update their own items
+      allow update: if request.auth.uid == uid
+        && (request.resource.data.title is string 
+          && request.resource.data.title.size() > 0);
+      
+      // User can delete their own items
+      allow delete: if request.auth.uid == uid;
+    }
+    
+    // ==================== USER PROFILES ====================
+    // Each user's profile - only they can edit it
+    
+    match /users/{uid} {
+      // User can read their own profile
+      allow read: if request.auth.uid == uid;
+      
+      // User can create/update their profile
+      allow write: if request.auth.uid == uid;
+    }
+    
+    // ==================== DENY EVERYTHING ELSE ====================
+    // Default deny - anything not explicitly allowed is forbidden
+    
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
+
+/*
+==================== RULE EXPLANATIONS ====================
+
+1. USER ISOLATION
+   match /users/{uid}/items/{itemId}
+   
+   This structure means:
+   - Each user has their own /users/{uid} document
+   - Inside it, they have a collection called items
+   - Each item is a document with its own {itemId}
+   
+   Example path: /users/user123abc/items/item456def
+
+
+2. AUTHENTICATION CHECK
+   if request.auth.uid == uid
+   
+   This checks if the current user's UID matches the document's UID
+   - If user tries to access /users/otherUser/items/..., it's DENIED
+   - Only the document owner can access it
+
+
+3. VALIDATION
+   && request.resource.data.keys().hasAll(['title', 'createdAt'])
+   && request.resource.data.title is string
+   && request.resource.data.title.size() > 0
+   
+   These checks ensure:
+   - Required fields exist (title, createdAt)
+   - Fields have correct types (title must be string)
+   - Values meet constraints (non-empty title)
+
+
+4. DEFAULT DENY
+   match /{document=**} {
+     allow read, write: if false;
+   }
+   
+   Anything not explicitly allowed is forbidden
+   This is a security best practice (whitelist, not blacklist)
+
+
+==================== COMMON OPERATIONS ====================
+
+✅ ALLOWED:
+- User 'abc123' creates item in /users/abc123/items/
+- User 'abc123' reads their own items
+- User 'abc123' updates their own items
+- User 'abc123' deletes their own items
+
+❌ DENIED:
+- User 'abc123' accesses /users/xyz789/items/ (not their UID)
+- Anonymous user (not authenticated) reads anything
+- Invalid data (empty title) is created
+- Unauthenticated deletes
+- Accessing paths outside /users/{uid}/items/
+
+
+==================== TESTING RULES ====================
+
+Before deploying, test with Firebase Simulator:
+
+1. Simulator tab → Fill in document path
+   Path: users/testuser123/items/testitem456
+   
+2. Set authentication
+   UID: testuser123
+   
+3. Test READ
+   Should SUCCEED ✅
+   
+4. Test READ with different UID
+   UID: otheruser789
+   Should FAIL ❌
+   
+5. Test WRITE with valid data
+   { title: "Test", createdAt: now }
+   Should SUCCEED ✅
+   
+6. Test WRITE with invalid data
+   { createdAt: now }  (missing title)
+   Should FAIL ❌
+
+
+==================== CUSTOMIZATION ====================
+
+If you need different rules:
+
+A) Allow other users to read items (public items)
+   match /users/{uid}/items/{itemId} {
+     allow read: if true;  // Anyone can read
+     allow write: if request.auth.uid == uid;  // Only owner can edit
+   }
+
+B) Allow admins to access all data
+   match /users/{uid}/items/{itemId} {
+     allow read, write: if request.auth.uid == uid
+       || isAdmin(request.auth.uid);
+   }
+   
+   function isAdmin(uid) {
+     return get(/databases/$(database)/documents/admins/$(uid)).data.isAdmin == true;
+   }
+
+C) Add timestamps and audit trails
+   allow create, update: if request.auth.uid == uid
+     && request.time == request.resource.data.updatedAt;
+
+D) Limit data size
+   allow write: if request.auth.uid == uid
+     && request.resource.data.description.size() < 1000;
+
+
+==================== SECURITY BEST PRACTICES ====================
+
+✅ DO:
+- Always check request.auth.uid
+- Include validation rules
+- Use default deny
+- Test rules in simulator first
+- Document your rules (like this file)
+- Use specific collection paths
+- Validate required fields
+- Limit field sizes
+
+❌ DON'T:
+- Use { allow read, write: if true } in production
+- Trust client-side validation alone
+- Allow public access to user data
+- Store sensitive data (passwords, tokens)
+- Use overly complex rules
+- Forget to test edge cases
+- Change rules without testing
+
+
+==================== FIREBASE CONSOLE SETUP ====================
+
+1. Go to https://console.firebase.google.com
+2. Select your project (edutrack-49094)
+3. Navigate to: Firestore Database → Rules
+4. Replace default rules with this content
+5. Click "Simulate" tab
+6. Run tests (see TESTING section above)
+7. When confident, click "Publish"
+8. Monitor for errors in Rules Status
+
+
+==================== DEPLOYMENT CHECKLIST ====================
+
+Before going live:
+
+☐ Read through all rules
+☐ Test with Firebase Simulator
+☐ Test CREATE operation
+☐ Test READ operation
+☐ Test UPDATE operation
+☐ Test DELETE operation
+☐ Test with wrong UID (should fail)
+☐ Test anonymous access (should fail)
+☐ Test invalid data (should fail)
+☐ Check console for errors (24 hours after deploy)
+☐ Monitor Firestore quotas
+☐ Have rollback plan ready
+
+
+==================== MONITORING ====================
+
+After deploying:
+
+1. Firebase Console → Firestore → Rules
+   - Shows deploy status
+   - Shows error rates
+   - Shows rejected requests
+
+2. Cloud Logging
+   - Set up alerts for authentication failures
+   - Monitor for unusual access patterns
+   - Check for brute force attempts
+
+3. Regular audits
+   - Review who has access
+   - Update rules if needed
+   - Test quarterly
+
+
+==================== TROUBLESHOOTING ====================
+
+Issue: "PERMISSION_DENIED" error
+
+Possible causes:
+1. User not authenticated
+   Solution: Ensure user is signed in before CRUD operations
+
+2. UID doesn't match path
+   Solution: Use request.auth.uid which auto-gets current user
+
+3. Rules not published
+   Solution: Check Rules tab shows "Rules Updated" message
+
+4. Invalid data format
+   Solution: Check your data includes required fields
+
+Solution: Trace the request
+1. Get user's UID
+2. Trace the document path
+3. Check if uid in path matches user's UID
+4. Check if data meets validation requirements
+5. Re-publish rules if changed
+
+
+==================== RELATED RULES PATTERNS ====================
+
+For more complex scenarios, see:
+- Firestore docs: https://firebase.google.com/docs/firestore/security/start
+- Rules playground: https://firebase.google.com/docs/firestore/security/rules-structure
+- Best practices: https://firebase.google.com/docs/firestore/best-practices
+
+
+==================== VERSION HISTORY ====================
+
+v1.0 - Initial CRUD rules for EduTrack
+- User isolation (only access own items)
+- Data validation (required fields, types, sizes)
+- Default deny policy
+- Well-documented for learning
+
+
+*/
