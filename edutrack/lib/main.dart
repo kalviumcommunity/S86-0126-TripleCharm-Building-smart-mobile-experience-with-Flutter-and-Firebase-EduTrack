@@ -25,6 +25,7 @@ import 'screens/firebase_storage_upload_demo.dart';
 import 'screens/demo_launcher_screen.dart';
 import 'screens/map_screen.dart';
 import 'screens/crud_demo_screen.dart';
+import 'screens/main_navigation_screen.dart';
 
 void main() async {
   // Ensure Flutter bindings are initialized
@@ -98,9 +99,9 @@ class MyApp extends StatelessWidget {
             );
           }
 
-          // If user is logged in, show dashboard
+          // If user is logged in, show main navigation with bottom nav bar
           if (snapshot.hasData) {
-            return const DashboardScreen();
+            return const MainNavigationScreen();
           }
 
           // If user is not logged in, show authentication screen
