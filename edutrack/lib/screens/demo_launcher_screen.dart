@@ -3,6 +3,9 @@ import 'firestore_queries_demo.dart';
 import 'map_screen.dart';
 import 'location_demo_screen.dart';
 import 'crud_demo_screen.dart';
+import 'complex_form_validation_demo.dart';
+import 'simple_form_validation_example.dart';
+import 'student_registration_form.dart';
 
 /// Demo Launcher Screen
 /// 
@@ -112,6 +115,51 @@ class DemoLauncherScreen extends StatelessWidget {
                   context,
                   MaterialPageRoute(
                     builder: (context) => const CrudDemoScreen(),
+                  ),
+                );
+              },
+            ),
+            _buildDemoCard(
+              context,
+              title: 'Simple Validation',
+              subtitle: 'Basic Form & Input Checks',
+              icon: Icons.check_circle_outline,
+              color: Colors.indigo,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const SimpleFormValidationExample(),
+                  ),
+                );
+              },
+            ),
+            _buildDemoCard(
+              context,
+              title: 'Advanced Forms',
+              subtitle: 'Complex Forms & Validation',
+              icon: Icons.checklist_rtl,
+              color: Colors.purple,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const ComplexFormValidationDemo(),
+                  ),
+                );
+              },
+            ),
+            _buildDemoCard(
+              context,
+              title: 'Student Form',
+              subtitle: 'Real-world Registration',
+              icon: Icons.assignment_ind,
+              color: Colors.deepOrange,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const StudentRegistrationForm(),
                   ),
                 );
               },
