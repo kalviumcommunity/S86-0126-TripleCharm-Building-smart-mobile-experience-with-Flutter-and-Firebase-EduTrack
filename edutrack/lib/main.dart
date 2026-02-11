@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:provider/provider.dart';
 import 'services/notification_service.dart';
 import 'screens/welcome_screen.dart';
 import 'screens/login_screen.dart';
@@ -26,6 +27,10 @@ import 'screens/demo_launcher_screen.dart';
 import 'screens/map_screen.dart';
 import 'screens/crud_demo_screen.dart';
 import 'screens/main_navigation_screen.dart';
+import 'screens/theme_settings_screen.dart';
+import 'utils/theme_provider.dart';
+import 'utils/theme_light.dart';
+import 'utils/theme_dark.dart';
 
 void main() async {
   // Ensure Flutter bindings are initialized
@@ -66,7 +71,13 @@ void main() async {
     print('❌ Notification Service initialization error: $e');
   }
   
-  runApp(const MyApp());
+  runApp(
+    // Wrap app with ChangeNotifierProvider for theme management
+    ChangeNotifierProvider(
+      create: (_) => ThemeProvider(),
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -74,17 +85,22 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Access theme provider to get current theme mode
+    final themeProvider = Provider.of<ThemeProvider>(context);
+    
     return MaterialApp(
       title: 'EduTrack',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF6C63FF)),
-        useMaterial3: true,
-        appBarTheme: const AppBarTheme(
-          centerTitle: false,
-          elevation: 2,
-        ),
-      ),
+      
+      // Apply custom light theme
+      theme: getLightTheme(),
+      
+      // Apply custom dark theme
+      darkTheme: getDarkTheme(),
+      
+      // Use theme mode from provider (supports light/dark/system)
+      themeMode: themeProvider.themeMode,
+      
       // Use StreamBuilder to listen to authentication state changes
       // This enables real-time navigation without manual routing
       home: StreamBuilder<User?>(
@@ -128,6 +144,7 @@ class MyApp extends StatelessWidget {
         '/demos': (context) => const DemoLauncherScreen(),
         '/map': (context) => const MapScreen(),
         '/crud-demo': (context) => const CrudDemoScreen(),
+        '/theme-settings': (context) => const ThemeSettingsScreen(),
       },
     );
   }
