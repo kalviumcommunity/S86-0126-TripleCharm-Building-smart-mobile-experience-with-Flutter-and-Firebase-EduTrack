@@ -49,6 +49,10 @@ dependencies:
   # Location and Maps
   google_maps_flutter: ^2.10.0
   geolocator: ^11.0.0
+  
+  # State Management & Persistence
+  provider: ^6.1.2
+  shared_preferences: ^2.2.3
 
 dev_dependencies:
   flutter_test:
