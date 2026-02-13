@@ -5250,6 +5250,138 @@ try {
 
 ---
 
+## Testing the App on Emulator and Physical Devices
+
+Before deploying or showcasing a Flutter app, test it across multiple devices. Emulators cover screen sizes and OS versions quickly, while physical devices reveal real-world performance, hardware limits, and permission flows.
+
+### 1) Why Testing on Multiple Devices Matters
+
+- Ensures UI responsiveness across screen sizes and resolutions.
+- Reveals hardware-related issues (GPS, camera, sensors).
+- Validates permissions, notifications, and real-device behavior.
+- Helps identify OS-specific bugs (Android/iOS).
+- Improves app reliability before release.
+
+### 2) Setting Up an Emulator
+
+**Android Emulator (Android Studio)**
+
+1. Open Android Studio → Device Manager.
+2. Click **Create Virtual Device**.
+3. Choose a device profile (Pixel 6, Pixel 4, etc.).
+4. Select a system image (Android 12/13 recommended).
+5. Launch the emulator and wait for boot.
+
+Run the app:
+
+```bash
+flutter run
+```
+
+**iOS Simulator (macOS only)**
+
+1. Open Xcode → Open Developer Tools → Simulator.
+2. Choose a device (iPhone 14, iPhone 12, etc.).
+
+Run the app:
+
+```bash
+flutter run -d ios
+```
+
+### 3) Setting Up a Physical Device
+
+**Android Device Setup**
+
+1. Settings → About Phone → tap **Build Number** 7 times.
+2. Enable **Developer Options**.
+3. Turn on **USB Debugging**.
+4. Connect via USB cable and approve the fingerprint prompt.
+
+Verify detection:
+
+```bash
+flutter devices
+```
+
+Run:
+
+```bash
+flutter run -d <device-id>
+```
+
+**iOS Device Setup (macOS + Xcode)**
+
+1. Connect iPhone via USB.
+2. Trust the computer on the device.
+3. Open the project in Xcode and sign the app (Apple ID required).
+
+Run:
+
+```bash
+flutter run -d <device-id>
+```
+
+### 4) Testing Device-Specific Behaviors
+
+**What to test on emulator**
+
+- Multiple screen sizes.
+- Orientation changes.
+- App lifecycle (minimize, reopen).
+- Navigation flow.
+- Form input.
+
+**What to test on physical devices**
+
+- Permissions (camera, location, notifications).
+- Internet connectivity variance.
+- Performance and animations.
+- Touch responsiveness.
+- Firebase integrations (Auth, Firestore, FCM).
+
+### 5) Debugging Common Device Issues
+
+| Issue | Cause | Fix |
+|-------|-------|-----|
+| Device not detected | Missing drivers or USB config | Reconnect, install drivers, restart ADB |
+| Slow emulator | Low RAM/CPU | Increase profile resources or use a physical device |
+| iOS build fail | Missing signing | Add Apple ID in Xcode |
+| Firebase not working | SHA keys missing | Add SHA-1/SHA-256 to Firebase |
+| Permissions denied | User denied prompt | Revoke and retry permissions |
+
+### 6) Running on Multiple Devices
+
+To test on emulator and phone simultaneously:
+
+```bash
+flutter run -d emulator-5554
+flutter run -d <physical-device-id>
+```
+
+### 7) Screenshots and Logs for Testing
+
+Logs:
+
+```bash
+flutter logs
+```
+
+Screenshots:
+
+- Android emulator: Press **Cmd + S** (macOS) or **Ctrl + S** (Windows/Linux).
+- Physical device: Use the device's hardware shortcut.
+
+### 8) Best Practices for Testing
+
+- Test on at least one old and one new Android version.
+- Test in both light and dark themes.
+- Check behavior in offline mode.
+- Rotate the device to verify responsiveness.
+- Perform long usage tests for memory leaks.
+
+---
+
 ##  Running the Application
 
 ### Prerequisites
@@ -5284,4 +5416,10 @@ Press 'r' in terminal
 **Date:** February 2, 2026
 
 For questions or support, refer to the Firebase Console or Flutter documentation.
+
+---
+
+## Assignment Status
+
+- Testing the App on Emulator and Physical Devices lesson included in this README.
 

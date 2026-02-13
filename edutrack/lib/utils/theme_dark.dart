@@ -40,7 +40,7 @@ ThemeData getDarkTheme() {
     ),
     
     // Card Theme
-    cardTheme: CardTheme(
+    cardTheme: CardThemeData(
       color: surfaceColor,
       elevation: 4,
       shadowColor: Colors.black.withOpacity(0.3),
