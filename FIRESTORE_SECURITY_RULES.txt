@@ -1,0 +1,193 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // ==================== HELPER FUNCTIONS ====================
+    /// Check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    /// Check if user owns the teacher document
+    function isTeacherOwner(teacherId) {
+      return request.auth.uid == teacherId;
+    }
+
+    // ==================== TEACHERS COLLECTION ====================
+    // Teachers - teacher profile documents
+    match /teachers/{teacherId} {
+      // Read: Teachers can read their own profile
+      allow read: if isAuthenticated() && isTeacherOwner(teacherId);
+      
+      // Create: Anyone authenticated can create their own teacher profile
+      allow create: if isAuthenticated() && request.auth.uid == teacherId &&
+        request.resource.data.uid == teacherId;
+      
+      // Update: Teachers can update their own profile
+      allow update: if isAuthenticated() && isTeacherOwner(teacherId);
+      
+      // Delete: Teachers can delete their own profile
+      allow delete: if isAuthenticated() && isTeacherOwner(teacherId);
+    }
+
+    // ==================== CLASSES COLLECTION ====================
+    // Classes - teacher's classes
+    match /classes/{classId} {
+      // Read: Teachers can read their own classes
+      allow read: if isAuthenticated() && 
+        resource.data.teacherId == request.auth.uid;
+      
+      // Create: Teachers can create classes for themselves
+      allow create: if isAuthenticated() && 
+        request.resource.data.teacherId == request.auth.uid;
+      
+      // Update: Teachers can update their own classes
+      allow update: if isAuthenticated() && 
+        resource.data.teacherId == request.auth.uid;
+      
+      // Delete: Teachers can delete their own classes
+      allow delete: if isAuthenticated() && 
+        resource.data.teacherId == request.auth.uid;
+    }
+
+    // ==================== STUDENTS COLLECTION ====================
+    // Students - teacher's students
+    match /students/{studentId} {
+      // Read: Teachers can read their own students
+      allow read: if isAuthenticated() && 
+        resource.data.teacherId == request.auth.uid;
+      
+      // Create: Teachers can create students for themselves
+      allow create: if isAuthenticated() && 
+        request.resource.data.teacherId == request.auth.uid;
+      
+      // Update: Teachers can update their own students
+      allow update: if isAuthenticated() && 
+        resource.data.teacherId == request.auth.uid;
+      
+      // Delete: Teachers can delete their own students
+      allow delete: if isAuthenticated() && 
+        resource.data.teacherId == request.auth.uid;
+    }
+
+    // ==================== ATTENDANCE COLLECTION ====================
+    // Attendance - student attendance records
+    match /attendance/{attendanceId} {
+      // Read: Teachers can read attendance for their students
+      allow read: if isAuthenticated() && 
+        resource.data.teacherId == request.auth.uid;
+      
+      // Create: Teachers can create attendance records for their students
+      allow create: if isAuthenticated() && 
+        request.resource.data.teacherId == request.auth.uid;
+      
+      // Update: Teachers can update attendance for their students
+      allow update: if isAuthenticated() && 
+        resource.data.teacherId == request.auth.uid;
+      
+      // Delete: Teachers can delete attendance records for their students
+      allow delete: if isAuthenticated() && 
+        resource.data.teacherId == request.auth.uid;
+    }
+
+    // ==================== EXAMS COLLECTION ====================
+    // Exams - exams created by teachers
+    match /exams/{examId} {
+      // Read: Teachers can read their own exams
+      allow read: if isAuthenticated() && 
+        resource.data.teacherId == request.auth.uid;
+      
+      // Create: Teachers can create exams for themselves
+      allow create: if isAuthenticated() && 
+        request.resource.data.teacherId == request.auth.uid;
+      
+      // Update: Teachers can update their own exams
+      allow update: if isAuthenticated() && 
+        resource.data.teacherId == request.auth.uid;
+      
+      // Delete: Teachers can delete their own exams
+      allow delete: if isAuthenticated() && 
+        resource.data.teacherId == request.auth.uid;
+    }
+
+    // ==================== MARKS COLLECTION ====================
+    // Marks - student marks/grades
+    match /marks/{markId} {
+      // Read: Teachers can read marks for their students
+      allow read: if isAuthenticated() && 
+        resource.data.teacherId == request.auth.uid;
+      
+      // Create: Teachers can create marks for their students
+      allow create: if isAuthenticated() && 
+        request.resource.data.teacherId == request.auth.uid;
+      
+      // Update: Teachers can update marks for their students
+      allow update: if isAuthenticated() && 
+        resource.data.teacherId == request.auth.uid;
+      
+      // Delete: Teachers can delete marks for their students
+      allow delete: if isAuthenticated() && 
+        resource.data.teacherId == request.auth.uid;
+    }
+
+    // ==================== DEFAULT RULE ====================
+    // Deny all other access
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
+
+
+// ==================== RULES EXPLANATION ====================
+//
+// TEACHER-ONLY ARCHITECTURE:
+//
+// 1. AUTHENTICATION:
+//    - All operations require Firebase authentication (email/password)
+//    - Teachers sign up via Firebase Auth
+//
+// 2. TEACHER PROFILE (teachers/{teacherId}):
+//    - Any authenticated user can create their own teacher profile
+//    - Teachers can only read/update/delete their own profile
+//    - Profile contains: uid, name, email, phone, createdAt
+//
+// 3. CLASSES (classes/{classId}):
+//    - Teachers can create classes only for themselves
+//    - Teachers can read/update/delete only their own classes
+//    - Each class must have teacherId matching the authenticated user
+//
+// 4. STUDENTS (students/{studentId}):
+//    - Teachers can create students only for themselves
+//    - Teachers can read/update/delete only their own students
+//    - Each student must have teacherId matching the authenticated user
+//
+// 5. ATTENDANCE (attendance/{attendanceId}):
+//    - Teachers can create attendance records for their students
+//    - Teachers can read/update/delete only their attendance records
+//    - Each record must have teacherId matching the authenticated user
+//
+// 6. EXAMS (exams/{examId}):
+//    - Teachers can create exams only for themselves
+//    - Teachers can read/update/delete only their own exams
+//    - Each exam must have teacherId matching the authenticated user
+//
+// 7. MARKS (marks/{markId}):
+//    - Teachers can create marks for their students
+//    - Teachers can read/update/delete only their marks
+//    - Each mark record must have teacherId matching the authenticated user
+//
+// ==================== SECURITY MODEL ====================
+//
+// PRINCIPLES:
+// 1. Data Isolation: Each teacher can only access their own data
+// 2. Ownership Enforcement: All documents must have teacherId field
+// 3. Authentication Required: No unauthenticated access allowed
+// 4. Principle of Least Privilege: Teachers have only necessary permissions
+//
+// IMPLEMENTATION:
+// - teacherId field MUST be present in all documents
+// - teacherId must match request.auth.uid for all operations
+// - Default rule explicitly denies access to undefined collections
+// - No cross-teacher data access is allowed
+//

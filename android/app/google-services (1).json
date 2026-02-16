@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "655038338036",
+    "project_id": "edutrack-demo-e4192",
+    "storage_bucket": "edutrack-demo-e4192.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:655038338036:android:b94f7de2155f4e456edfa1",
+        "android_client_info": {
+          "package_name": "com.example.edutrack_demo"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAvZuF9WO5JsqIuH0-IIli5jyc1PlqWQCc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

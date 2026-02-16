@@ -1,0 +1,123 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper function to check if user is signed in
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    
+    // Helper function to get user's role from their document
+    function getUserRole() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
+    }
+    
+    // Helper function to check if user is a teacher
+    function isTeacher() {
+      return isSignedIn() && getUserRole() == 'teacher';
+    }
+    
+    // Helper function to check if user is a student
+    function isStudent() {
+      return isSignedIn() && getUserRole() == 'student';
+    }
+
+    // USERS COLLECTION - Strict access control
+    // Users can only read their OWN profile data
+    match /users/{userId} {
+      // Allow read ONLY own data
+      allow read: if isSignedIn() && request.auth.uid == userId;
+      
+      // Allow create during signup
+      allow create: if isSignedIn() && request.auth.uid == userId;
+      
+      // Allow update/delete only own data
+      allow update, delete: if isSignedIn() && request.auth.uid == userId;
+    }
+
+    // CLASSES COLLECTION - Teachers can manage their own classes
+    match /classes/{classId} {
+      // Teachers can read/write their own classes
+      // Students can read classes they're enrolled in
+      allow read: if isSignedIn();
+      allow create: if isTeacher();
+      allow update, delete: if isTeacher() && 
+        resource.data.teacherId == request.auth.uid;
+    }
+    
+    // STUDENTS COLLECTION - Teachers manage students in their classes
+    match /students/{studentId} {
+      // Anyone signed in can read (needed for cross-class operations)
+      // ALSO allow unauthenticated read for email validation during signup
+      allow read: if isSignedIn() || 
+        (request.auth == null && 
+         ('email' in resource.data) && 
+         (request.query.limit <= 1));
+      
+      // Teachers can create students in their own classes
+      allow create: if isTeacher() && 
+        get(/databases/$(database)/documents/classes/$(request.resource.data.classId)).data.teacherId == request.auth.uid;
+      
+      // Teachers can update/delete students in their classes
+      allow update, delete: if isTeacher() && 
+        get(/databases/$(database)/documents/classes/$(resource.data.classId)).data.teacherId == request.auth.uid;
+    }
+    
+    // ATTENDANCE COLLECTION - Teachers manage, students can view
+    match /attendance/{attendanceId} {
+      allow read: if isSignedIn();
+      
+      // Teachers can create attendance for their classes
+      allow create: if isTeacher() && 
+        get(/databases/$(database)/documents/classes/$(request.resource.data.classId)).data.teacherId == request.auth.uid;
+      
+      // Teachers can update/delete attendance for their classes
+      allow update, delete: if isTeacher() && 
+        get(/databases/$(database)/documents/classes/$(resource.data.classId)).data.teacherId == request.auth.uid;
+    }
+    
+    // MARKS COLLECTION - Teachers manage, students can view their own
+    match /marks/{marksId} {
+      allow read: if isSignedIn();
+      
+      // Teachers can create marks for their classes
+      allow create: if isTeacher() && 
+        get(/databases/$(database)/documents/classes/$(request.resource.data.classId)).data.teacherId == request.auth.uid;
+      
+      // Teachers can update/delete marks for their classes
+      allow update, delete: if isTeacher() && 
+        get(/databases/$(database)/documents/classes/$(resource.data.classId)).data.teacherId == request.auth.uid;
+    }
+    
+    // ANNOUNCEMENTS COLLECTION - Teachers create, all can read
+    match /announcements/{announcementId} {
+      allow read: if isSignedIn();
+      
+      // Teachers can create announcements for their classes
+      allow create: if isTeacher() && 
+        get(/databases/$(database)/documents/classes/$(request.resource.data.classId)).data.teacherId == request.auth.uid;
+      
+      // Teachers can update/delete their own announcements
+      allow update, delete: if isTeacher() && 
+        get(/databases/$(database)/documents/classes/$(resource.data.classId)).data.teacherId == request.auth.uid;
+    }
+
+    // EXAMS COLLECTION - Teachers manage, students can read
+    match /exams/{examId} {
+      allow read: if isSignedIn();
+      
+      // Teachers can create exams for their classes
+      allow create: if isTeacher() && 
+        get(/databases/$(database)/documents/classes/$(request.resource.data.classId)).data.teacherId == request.auth.uid;
+      
+      // Teachers can update/delete exams for their classes
+      allow update, delete: if isTeacher() && 
+        get(/databases/$(database)/documents/classes/$(resource.data.classId)).data.teacherId == request.auth.uid;
+    }
+
+    // Connection test collection
+    match /_connection_test/{document=**} {
+      allow read: if true;
+    }
+  }
+}
