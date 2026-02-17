@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import '../../config/theme.dart';
 import '../../providers/marks_provider.dart';
+import '../../providers/student_provider.dart';
 import '../../models/marks_model.dart';
 
 /// Screen to view all marks for a class
@@ -30,6 +31,7 @@ class _MarksViewScreenState extends State<MarksViewScreen> {
     _selectedSubject = 'All';
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<MarksProvider>().loadClassMarks(widget.classId);
+      context.read<StudentProvider>().loadClassStudents(widget.classId);
     });
   }
 
@@ -191,194 +193,214 @@ class _MarksViewScreenState extends State<MarksViewScreen> {
     required List<MarksModel> marks,
     required DateTime recordedAt,
   }) {
-    // Calculate statistics
-    final obtainedMarks = marks.map((m) => m.marksObtained ?? 0.0).toList();
-    final avg = obtainedMarks.isNotEmpty ? obtainedMarks.reduce((a, b) => a + b) / obtainedMarks.length : 0.0;
-    final highest = obtainedMarks.isNotEmpty ? obtainedMarks.reduce((a, b) => a > b ? a : b) : 0.0;
-    final lowest = obtainedMarks.isNotEmpty ? obtainedMarks.reduce((a, b) => a < b ? a : b) : 0.0;
-    final avgPercent = (avg / totalMarks) * 100;
+    return Consumer<StudentProvider>(
+      builder: (context, studentProvider, _) {
+        final allStudents = studentProvider.classStudents;
+        
+        // Calculate statistics only for students with marks
+        final obtainedMarks = marks.map((m) => m.marksObtained ?? 0.0).toList();
+        final avg = obtainedMarks.isNotEmpty ? obtainedMarks.reduce((a, b) => a + b) / obtainedMarks.length : 0.0;
+        final highest = obtainedMarks.isNotEmpty ? obtainedMarks.reduce((a, b) => a > b ? a : b) : 0.0;
+        final lowest = obtainedMarks.isNotEmpty ? obtainedMarks.reduce((a, b) => a < b ? a : b) : 0.0;
+        final avgPercent = obtainedMarks.isNotEmpty ? (avg / totalMarks) * 100 : 0.0;
 
-    return Card(
-      margin: const EdgeInsets.only(bottom: 16),
-      elevation: 2,
-      child: Theme(
-        data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
-        child: ExpansionTile(
-          tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          childrenPadding: const EdgeInsets.all(16),
-          leading: CircleAvatar(
-            backgroundColor: _getSubjectColor(subject),
-            child: const Icon(Icons.assessment, color: Colors.white, size: 20),
-          ),
-          title: Text(
-            testName,
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-          ),
-          subtitle: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 4),
-              Row(
+        return Card(
+          margin: const EdgeInsets.only(bottom: 16),
+          elevation: 2,
+          child: Theme(
+            data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+            child: ExpansionTile(
+              tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              childrenPadding: const EdgeInsets.all(16),
+              leading: CircleAvatar(
+                backgroundColor: _getSubjectColor(subject),
+                child: const Icon(Icons.assessment, color: Colors.white, size: 20),
+              ),
+              title: Text(
+                testName,
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              ),
+              subtitle: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                    decoration: BoxDecoration(
-                      color: _getSubjectColor(subject).withAlpha(30),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      subject,
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: _getSubjectColor(subject),
-                        fontWeight: FontWeight.bold,
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: _getSubjectColor(subject).withAlpha(30),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          subject,
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: _getSubjectColor(subject),
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Total: $totalMarks',
+                        style: const TextStyle(fontSize: 12),
+                      ),
+                      const SizedBox(width: 12),
+                      Text(
+                        DateFormat('MMM dd, yyyy').format(recordedAt),
+                        style: TextStyle(fontSize: 11, color: Colors.grey[600]),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    marks.isEmpty ? 'No marks recorded' : 'Class Avg: ${avg.toStringAsFixed(1)}/${totalMarks.toStringAsFixed(0)} (${avgPercent.toStringAsFixed(1)}%)',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: marks.isEmpty ? Colors.grey[600] : _getPercentageColor(avgPercent),
+                      fontWeight: FontWeight.w500,
                     ),
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    'Total: $totalMarks',
-                    style: const TextStyle(fontSize: 12),
-                  ),
-                  const SizedBox(width: 12),
-                  Text(
-                    DateFormat('MMM dd, yyyy').format(recordedAt),
-                    style: TextStyle(fontSize: 11, color: Colors.grey[600]),
                   ),
                 ],
               ),
-              const SizedBox(height: 4),
-              Text(
-                'Class Avg: ${avg.toStringAsFixed(1)}/${totalMarks.toStringAsFixed(0)} (${avgPercent.toStringAsFixed(1)}%)',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: _getPercentageColor(avgPercent),
-                  fontWeight: FontWeight.w500,
+              children: [
+                // Statistics Row
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: AppTheme.neutralGray,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      _buildStatItem('Students', allStudents.length.toString(), Icons.people),
+                      _buildStatItem('Highest', marks.isEmpty ? '-' : highest.toStringAsFixed(1), Icons.arrow_upward, Colors.green),
+                      _buildStatItem('Lowest', marks.isEmpty ? '-' : lowest.toStringAsFixed(1), Icons.arrow_downward, Colors.red),
+                      _buildStatItem('Average', marks.isEmpty ? '-' : avg.toStringAsFixed(1), Icons.analytics, AppTheme.accentColor),
+                    ],
+                  ),
                 ),
-              ),
-            ],
-          ),
-          children: [
-            // Statistics Row
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: AppTheme.neutralGray,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  _buildStatItem('Students', marks.length.toString(), Icons.people),
-                  _buildStatItem('Highest', highest.toStringAsFixed(1), Icons.arrow_upward, Colors.green),
-                  _buildStatItem('Lowest', lowest.toStringAsFixed(1), Icons.arrow_downward, Colors.red),
-                  _buildStatItem('Average', avg.toStringAsFixed(1), Icons.analytics, AppTheme.accentColor),
-                ],
-              ),
-            ),
-            const SizedBox(height: 16),
-            
-            // Student Marks Table
-            Container(
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey[300]!),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Column(
-                children: [
-                  // Header
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                    decoration: BoxDecoration(
-                      color: AppTheme.primaryColor.withAlpha(20),
-                      borderRadius: const BorderRadius.vertical(top: Radius.circular(8)),
-                    ),
-                    child: const Row(
-                      children: [
-                        Expanded(
-                          flex: 3,
-                          child: Text('Student', style: TextStyle(fontWeight: FontWeight.bold)),
-                        ),
-                        Expanded(
-                          flex: 2,
-                          child: Text('Marks', style: TextStyle(fontWeight: FontWeight.bold), textAlign: TextAlign.center),
-                        ),
-                        Expanded(
-                          flex: 2,
-                          child: Text('Percentage', style: TextStyle(fontWeight: FontWeight.bold), textAlign: TextAlign.right),
-                        ),
-                      ],
-                    ),
+                const SizedBox(height: 16),
+                
+                // Student Marks Table
+                Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey[300]!),
+                    borderRadius: BorderRadius.circular(8),
                   ),
-                  
-                  // Student Rows
-                  ...marks.asMap().entries.map((entry) {
-                    final index = entry.key;
-                    final mark = entry.value;
-                    final percentage = ((mark.marksObtained ?? 0.0) / totalMarks) * 100;
-                    
-                    return Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                      decoration: BoxDecoration(
-                        color: index.isEven ? Colors.white : Colors.grey[50],
-                        border: Border(
-                          bottom: BorderSide(
-                            color: Colors.grey[200]!,
-                            width: index == marks.length - 1 ? 0 : 1,
-                          ),
+                  child: Column(
+                    children: [
+                      // Header
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        decoration: BoxDecoration(
+                          color: AppTheme.primaryColor.withAlpha(20),
+                          borderRadius: const BorderRadius.vertical(top: Radius.circular(8)),
+                        ),
+                        child: const Row(
+                          children: [
+                            Expanded(
+                              flex: 3,
+                              child: Text('Student', style: TextStyle(fontWeight: FontWeight.bold)),
+                            ),
+                            Expanded(
+                              flex: 2,
+                              child: Text('Marks', style: TextStyle(fontWeight: FontWeight.bold), textAlign: TextAlign.center),
+                            ),
+                            Expanded(
+                              flex: 2,
+                              child: Text('Percentage', style: TextStyle(fontWeight: FontWeight.bold), textAlign: TextAlign.right),
+                            ),
+                          ],
                         ),
                       ),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            flex: 3,
-                            child: FutureBuilder<String?>(
-                              future: _getStudentName(mark.studentId),
-                              builder: (context, snapshot) {
-                                return Text(
-                                  snapshot.data ?? 'Student ${mark.studentId.substring(0, 8)}...',
+                      
+                      // Student Rows - Show all students
+                      ...allStudents.asMap().entries.map((entry) {
+                        final index = entry.key;
+                        final student = entry.value;
+                        
+                        // Find marks for this student
+                        final studentMark = marks.where((m) => m.studentId == student.id).firstOrNull;
+                        final hasMarks = studentMark != null;
+                        final percentage = hasMarks ? ((studentMark.marksObtained ?? 0.0) / totalMarks) * 100 : 0.0;
+                        
+                        return Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                          decoration: BoxDecoration(
+                            color: index.isEven ? Colors.white : Colors.grey[50],
+                            border: Border(
+                              bottom: BorderSide(
+                                color: Colors.grey[200]!,
+                                width: index == allStudents.length - 1 ? 0 : 1,
+                              ),
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                flex: 3,
+                                child: Text(
+                                  student.name,
                                   style: const TextStyle(fontSize: 14),
-                                );
-                              },
-                            ),
-                          ),
-                          Expanded(
-                            flex: 2,
-                            child: Text(
-                              '${(mark.marksObtained ?? 0.0).toStringAsFixed(1)}/${totalMarks.toStringAsFixed(0)}',
-                              style: const TextStyle(fontSize: 14),
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                          Expanded(
-                            flex: 2,
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                              decoration: BoxDecoration(
-                                color: _getPercentageColor(percentage).withAlpha(20),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Text(
-                                '${percentage.toStringAsFixed(1)}%',
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.bold,
-                                  color: _getPercentageColor(percentage),
                                 ),
-                                textAlign: TextAlign.right,
                               ),
-                            ),
+                              Expanded(
+                                flex: 2,
+                                child: Text(
+                                  hasMarks 
+                                    ? '${(studentMark.marksObtained ?? 0.0).toStringAsFixed(1)}/${totalMarks.toStringAsFixed(0)}'
+                                    : '-',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: hasMarks ? Colors.black : Colors.grey[500],
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                              Expanded(
+                                flex: 2,
+                                child: hasMarks
+                                  ? Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                      decoration: BoxDecoration(
+                                        color: _getPercentageColor(percentage).withAlpha(20),
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      child: Text(
+                                        '${percentage.toStringAsFixed(1)}%',
+                                        style: TextStyle(
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.bold,
+                                          color: _getPercentageColor(percentage),
+                                        ),
+                                        textAlign: TextAlign.right,
+                                      ),
+                                    )
+                                  : Text(
+                                      'Not entered',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: Colors.grey[500],
+                                        fontStyle: FontStyle.italic,
+                                      ),
+                                      textAlign: TextAlign.right,
+                                    ),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
-                    );
-                  }),
-                ],
-              ),
+                        );
+                      }),
+                    ],
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 
@@ -426,22 +448,5 @@ class _MarksViewScreenState extends State<MarksViewScreen> {
     if (percentage >= 70) return AppTheme.successColor;
     if (percentage >= 50) return AppTheme.warningColor;
     return AppTheme.errorColor;
-  }
-
-  Future<String?> _getStudentName(String studentId) async {
-    try {
-      final marksProvider = context.read<MarksProvider>();
-      // Try to find student name from loaded marks
-      final marks = marksProvider.marks;
-      for (var mark in marks) {
-        if (mark.studentId == studentId) {
-          // Try to get student name from database if needed
-          return 'Student ${mark.studentId.substring(0, 8)}...';
-        }
-      }
-      return null;
-    } catch (e) {
-      return null;
-    }
   }
 }
