@@ -95,35 +95,104 @@ class _TeacherReportsPlaceholder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final classProvider = context.watch<ClassProvider>();
-    final selectedClass = classProvider.selectedClass;
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Reports'),
+        backgroundColor: AppTheme.primaryColor,
+        foregroundColor: Colors.white,
+      ),
+      body: Consumer<ClassProvider>(
+        builder: (context, classProvider, _) {
+          if (classProvider.isLoading) {
+            return const Center(child: CircularProgressIndicator());
+          }
 
-    if (selectedClass == null) {
-      return Scaffold(
-         appBar: AppBar(title: const Text('Reports')),
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.bar_chart, size: 64, color: Colors.grey[400]),
-              const SizedBox(height: 16),
-              const Text('Select a class to view reports'),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: () {
-                   // This is a placeholder, ideally we'd switch to Classes tab
-                },
-                child: const Text('Go to Classes'),
+          final classes = classProvider.classes;
+
+          if (classes.isEmpty) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.bar_chart, size: 64, color: Colors.grey[400]),
+                  const SizedBox(height: 16),
+                  Text(
+                    'No classes available',
+                    style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Create a class first to view reports',
+                    style: TextStyle(fontSize: 14, color: Colors.grey[500]),
+                  ),
+                ],
               ),
-            ],
-          ),
-        ),
-      );
-    }
+            );
+          }
 
-    return ReportsScreen(
-      classId: selectedClass.id,
-      className: selectedClass.name,
+          return ListView.builder(
+            padding: const EdgeInsets.all(16),
+            itemCount: classes.length,
+            itemBuilder: (context, index) {
+              final classItem = classes[index];
+              return Card(
+                elevation: 2,
+                margin: const EdgeInsets.only(bottom: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: ListTile(
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 12,
+                  ),
+                  leading: Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: AppTheme.primaryColor.withAlpha(30),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: const Icon(
+                      Icons.bar_chart,
+                      color: AppTheme.primaryColor,
+                      size: 28,
+                    ),
+                  ),
+                  title: Text(
+                    classItem.name,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                  subtitle: Text(
+                    classItem.description ?? 'No description',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                  trailing: const Icon(
+                    Icons.chevron_right,
+                    color: AppTheme.primaryColor,
+                  ),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => ReportsScreen(
+                          classId: classItem.id,
+                          className: classItem.name,
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              );
+            },
+          );
+        },
+      ),
     );
   }
 }

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../../config/theme.dart';
-import '../../providers/class_provider.dart';
+import '../../providers/student_provider.dart';
 import '../../providers/attendance_provider.dart';
 import '../../providers/marks_provider.dart';
 import '../../services/database_service.dart';
@@ -28,6 +28,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
 
   void _loadData() async {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
+      context.read<StudentProvider>().loadClassStudents(widget.classId);
       context.read<AttendanceProvider>().getClassAttendanceSummary(widget.classId);
       if (!mounted) return;
       context.read<MarksProvider>().loadClassMarks(widget.classId);
@@ -97,6 +98,9 @@ class _ReportsScreenState extends State<ReportsScreen> {
             const SizedBox(height: 24),
 
             Text('Performance Analytics', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+            const SizedBox(height: 4),
+            Text('Student grade distribution across all subjects', 
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey[600])),
             const SizedBox(height: 12),
             _buildPerformanceChart(marksProvider),
             const SizedBox(height: 24),
@@ -134,7 +138,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
         ),
         _ReportCard(
           title: 'Total Students',
-          value: context.watch<ClassProvider>().selectedClass?.studentCount?.toString() ?? '0',
+          value: context.watch<StudentProvider>().classStudentCount.toString(),
           color: AppTheme.primaryColor,
           icon: Icons.people_outline,
         ),
@@ -198,6 +202,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
   Widget _buildPerformanceChart(MarksProvider provider) {
     final distribution = provider.gradeDistribution;
     final maxVal = distribution.values.isEmpty ? 0 : distribution.values.reduce((a, b) => a > b ? a : b);
+    final totalStudentMarks = distribution.values.reduce((a, b) => a + b);
     
     if (maxVal == 0) {
       return const Card(child: Padding(padding: EdgeInsets.all(32), child: Center(child: Text('No marks data available'))));
@@ -206,41 +211,120 @@ class _ReportsScreenState extends State<ReportsScreen> {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: SizedBox(
-          height: 250,
-          child: BarChart(
-            BarChartData(
-              alignment: BarChartAlignment.spaceAround,
-              maxY: (maxVal + 1).toDouble(),
-              barTouchData: BarTouchData(enabled: true),
-              titlesData: FlTitlesData(
-                show: true,
-                bottomTitles: AxisTitles(
-                  sideTitles: SideTitles(
-                    showTitles: true,
-                    getTitlesWidget: (value, meta) {
-                      const titles = ['A', 'B', 'C', 'D', 'F'];
-                      return Text(titles[value.toInt()]);
+        child: Column(
+          children: [
+            SizedBox(
+              height: 250,
+              child: BarChart(
+                BarChartData(
+                  alignment: BarChartAlignment.spaceAround,
+                  maxY: (maxVal + 1).toDouble(),
+                  barTouchData: BarTouchData(
+                    enabled: true,
+                    touchTooltipData: BarTouchTooltipData(
+                      getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                        const grades = ['A (90-100%)', 'B (70-89%)', 'C (50-69%)', 'D (40-49%)', 'F (<40%)'];
+                        return BarTooltipItem(
+                          '${grades[group.x.toInt()]}\n${rod.toY.toInt()} students',
+                          const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                        );
+                      },
+                    ),
+                  ),
+                  titlesData: FlTitlesData(
+                    show: true,
+                    bottomTitles: AxisTitles(
+                      sideTitles: SideTitles(
+                        showTitles: true,
+                        getTitlesWidget: (value, meta) {
+                          const titles = ['A', 'B', 'C', 'D', 'F'];
+                          return Padding(
+                            padding: const EdgeInsets.only(top: 8.0),
+                            child: Text(
+                              titles[value.toInt()],
+                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    leftTitles: AxisTitles(
+                      sideTitles: SideTitles(
+                        showTitles: true, 
+                        reservedSize: 35,
+                        getTitlesWidget: (value, meta) {
+                          return Text(value.toInt().toString(), style: const TextStyle(fontSize: 12));
+                        },
+                      ),
+                    ),
+                    topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                    rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                  ),
+                  gridData: FlGridData(
+                    show: true,
+                    drawVerticalLine: false,
+                    horizontalInterval: 1,
+                    getDrawingHorizontalLine: (value) {
+                      return FlLine(
+                        color: Colors.grey[300],
+                        strokeWidth: 1,
+                      );
                     },
                   ),
+                  borderData: FlBorderData(show: false),
+                  barGroups: [
+                    _buildBarGroup(0, distribution['A']!.toDouble(), AppTheme.successColor),
+                    _buildBarGroup(1, distribution['B']!.toDouble(), Colors.lightGreen),
+                    _buildBarGroup(2, distribution['C']!.toDouble(), AppTheme.warningColor),
+                    _buildBarGroup(3, distribution['D']!.toDouble(), Colors.orange),
+                    _buildBarGroup(4, distribution['F']!.toDouble(), AppTheme.errorColor),
+                  ],
                 ),
-                leftTitles: AxisTitles(sideTitles: SideTitles(showTitles: true, reservedSize: 30)),
-                topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
               ),
-              gridData: const FlGridData(show: false),
-              borderData: FlBorderData(show: false),
-              barGroups: [
-                _buildBarGroup(0, distribution['A']!.toDouble(), AppTheme.successColor),
-                _buildBarGroup(1, distribution['B']!.toDouble(), Colors.lightGreen),
-                _buildBarGroup(2, distribution['C']!.toDouble(), AppTheme.warningColor),
-                _buildBarGroup(3, distribution['D']!.toDouble(), Colors.orange),
-                _buildBarGroup(4, distribution['F']!.toDouble(), AppTheme.errorColor),
+            ),
+            const SizedBox(height: 16),
+            // Grade Legend
+            Wrap(
+              spacing: 16,
+              runSpacing: 8,
+              alignment: WrapAlignment.center,
+              children: [
+                _buildGradeLegend(AppTheme.successColor, 'A', '90-100%', distribution['A']!),
+                _buildGradeLegend(Colors.lightGreen, 'B', '70-89%', distribution['B']!),
+                _buildGradeLegend(AppTheme.warningColor, 'C', '50-69%', distribution['C']!),
+                _buildGradeLegend(Colors.orange, 'D', '40-49%', distribution['D']!),
+                _buildGradeLegend(AppTheme.errorColor, 'F', '<40%', distribution['F']!),
               ],
             ),
-          ),
+            const SizedBox(height: 8),
+            Text(
+              'Total: $totalStudentMarks student marks across all subjects',
+              style: TextStyle(fontSize: 12, color: Colors.grey[600], fontStyle: FontStyle.italic),
+            ),
+          ],
         ),
       ),
+    );
+  }
+
+  Widget _buildGradeLegend(Color color, String grade, String range, int count) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 16,
+          height: 16,
+          decoration: BoxDecoration(
+            color: color,
+            borderRadius: BorderRadius.circular(4),
+          ),
+        ),
+        const SizedBox(width: 6),
+        Text(
+          '$grade ($range): $count',
+          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
+        ),
+      ],
     );
   }
 
